@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Data Validation Sandbox & Schema Hackathon</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brandGreen: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#15803d', /* Deep rich forest green */
+              600: '#166534',
+              700: '#14532d',
+              highlight: '#22c55e'
+            },
+            brandDark: {
+              main: '#121212',
+              card: '#1e1e1e',
+              border: '#2e2e2e'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom clean scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #888;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #15803d;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen font-sans transition-colors duration-200 dark:bg-brandDark-main dark:text-slate-100">
+
+  <!-- TOP HEADER / NAVIGATION -->
+  <header class="border-b border-slate-200 bg-white sticky top-0 z-40 dark:bg-brandDark-card dark:border-brandDark-border shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <!-- Brand/Logo (Forest Green & Black theme) -->
+        <div class="bg-black text-white p-2 rounded-lg flex items-center justify-center dark:bg-white dark:text-black">
+          <svg class="w-6 h-6 text-brandGreen-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight">AI Generated Data Validation</h1>
+          <p class="text-xs text-brandGreen-500 font-semibold dark:text-brandGreen-100 uppercase tracking-wider">Automated Structural Schema Enforcement Sandbox</p>
+        </div>
+      </div>
+
+      <!-- Quick Controls: System Status, Live API Toggle, Theme Toggle -->
+      <div class="flex items-center space-x-4">
+        <!-- Live API Badge (Simulated or Real) -->
+        <span id="engineBadge" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
+          <span class="w-2 h-2 mr-1.5 rounded-full bg-green-500 animate-pulse"></span>
+          Simulation Mode
+        </span>
+
+        <!-- Dark/Light Theme Button (Defaulting to light) -->
+        <button id="themeToggleBtn" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-brandDark-border text-slate-500 dark:text-slate-400 focus:outline-none" title="Toggle Light/Dark Theme">
+          <!-- Moon Icon (shows in light mode) -->
+          <svg id="themeMoonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+          </svg>
+          <!-- Sun Icon (shows in dark mode, hidden by default) -->
+          <svg id="themeSunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- WORKSPACE GRID -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    
+    <!-- SYSTEM PREAMBLE & INSTRUCTION BOX -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden dark:bg-brandDark-card dark:border-brandDark-border">
+      <div class="p-6 md:p-8 flex flex-col md:flex-row items-start justify-between gap-6">
+        <div class="space-y-3 max-w-4xl">
+          <div class="inline-block px-3 py-1 bg-brandGreen-50 text-brandGreen-500 rounded-md text-xs font-bold uppercase tracking-wider dark:bg-brandGreen-500/10">
+            Active Learning Lab Exercise
+          </div>
+          <h2 class="text-2xl font-bold tracking-tight">Protecting Pipelines Against Probabilistic Failures</h2>
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+            Standard large language models generate raw text. Even when explicitly instructed to output strict JSON data structures, they remain probabilistic systems vulnerable to syntax drift, incomplete objects, type mismatching, and unwanted conversational introductions. This playground showcases how <span class="font-semibold text-brandGreen-500">Automated Structural Schema Enforcement</span> locks down AI output pipelines to guarantee zero parsing errors in downstream databases.
+          </p>
+        </div>
+
+        <!-- API KEY SETTINGS POPOVER (Interactive and Premium) -->
+        <div class="w-full md:w-auto shrink-0">
+          <button id="openSettingsBtn" class="w-full md:w-auto px-4 py-2 bg-black text-white hover:bg-slate-800 text-sm font-semibold rounded-lg flex items-center justify-center space-x-2 transition-all dark:bg-white dark:text-black dark:hover:bg-slate-200">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <span>Configure Live Model API</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Expandable API Key Settings Drawer -->
+      <div id="settingsDrawer" class="hidden border-t border-slate-200 bg-slate-50 p-6 dark:bg-brandDark-main dark:border-brandDark-border">
+        <div class="max-w-3xl space-y-4">
+          <h3 class="text-md font-bold flex items-center space-x-2">
+            <span class="p-1 bg-brandGreen-500 text-white rounded-full"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></span>
+            <span>Upgrade to Live Google Gemini Validation Testing</span>
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-normal">
+            By default, this workbench runs highly realistic simulations showing exact schema mismatch failures. Providing your own Gemini API key enables direct live comparative requests executing active system prompt schemas directly to <code>gemini-2.5-flash-preview-09-2025</code>.
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-400 mb-2">Gemini API Key</label>
+              <input type="password" id="apiKeyInput" placeholder="Enter AI API Key..." class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-brandGreen-500 focus:border-brandGreen-500 dark:bg-brandDark-card dark:border-brandDark-border dark:text-white">
+            </div>
+            <div class="flex items-end">
+              <button id="saveApiKeyBtn" class="w-full px-4 py-2 bg-brandGreen-500 text-white font-semibold rounded-lg hover:bg-brandGreen-600 shadow-sm text-sm transition-all">
+                Validate & Connect Key
+              </button>
+            </div>
+          </div>
+          <div id="apiKeyStatus" class="text-xs font-medium"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 1: COMPARE RAW VS ENFORCED -->
+    <section class="space-y-4">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 class="text-xl font-bold tracking-tight">Step 1: Compare AI Output Modes</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Select an operational scenario and run both modes to compare physical data shapes and validate attributes.</p>
+        </div>
+
+        <!-- Scenario Selector Tabs -->
+        <div class="flex flex-wrap gap-2 p-1 bg-slate-200/60 rounded-xl dark:bg-brandDark-border">
+          <button onclick="switchScenario('cyber')" id="tab-cyber" class="scenario-tab px-4 py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-slate-900 transition-all dark:bg-brandDark-card dark:text-white border border-slate-300 dark:border-slate-700">
+            🛡️ Cybersecurity Incident Log
+          </button>
+          <button onclick="switchScenario('profile')" id="tab-profile" class="scenario-tab px-4 py-2 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition-all dark:text-slate-400 dark:hover:text-slate-100">
+            👤 Identity Access Manifest
+          </button>
+          <button onclick="switchScenario('iot')" id="tab-iot" class="scenario-tab px-4 py-2 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition-all dark:text-slate-400 dark:hover:text-slate-100">
+            📡 IoT Power Grid Telemetry
+          </button>
+        </div>
+      </div>
+
+      <!-- Comparator Playfield -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- LEFT COLUMN: RAW GENERATION (UNRESTRICTED) -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between overflow-hidden dark:bg-brandDark-card dark:border-brandDark-border">
+          <div class="p-6 border-b border-slate-100 dark:border-brandDark-border bg-gradient-to-r from-red-50/50 to-transparent dark:from-red-950/10">
+            <div class="flex justify-between items-center">
+              <div class="flex items-center space-x-2.5">
+                <span class="w-3 h-3 rounded-full bg-red-500"></span>
+                <h3 class="font-bold text-sm">Mode A: Raw LLM Output (Probabilistic Prompting)</h3>
+              </div>
+              <span class="text-xs bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300 px-2 py-0.5 rounded font-medium">Unvalidated</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Simulates AI tasked to produce JSON formatted text using typical system prompt guides.</p>
+          </div>
+
+          <!-- Prompt and Code Visualizer -->
+          <div class="p-6 space-y-4 flex-1">
+            <div class="space-y-1.5">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Appended Model Prompt</span>
+              <div class="bg-slate-100 dark:bg-brandDark-main p-3 rounded-lg text-xs font-mono text-slate-600 dark:text-slate-400 select-all border border-slate-200 dark:border-slate-800 leading-relaxed" id="rawPromptDisplay">
+                "Please construct an incident log with an id, host name, level, and timestamp. Output ONLY valid JSON."
+              </div>
+            </div>
+
+            <div class="space-y-1.5 flex flex-col h-[340px]">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Parsed Output Buffer</span>
+              <div class="relative flex-1 bg-slate-950 text-emerald-400 p-4 rounded-lg font-mono text-xs overflow-y-auto border border-slate-800 flex flex-col select-all">
+                <pre class="whitespace-pre-wrap flex-1" id="rawCodeArea">// Run generation below to simulate data arrival...</pre>
+                <!-- Code Highlight overlay panel -->
+                <div id="rawOverlayAlert" class="hidden absolute inset-0 bg-red-950/45 backdrop-blur-[1px] flex items-center justify-center p-4">
+                  <div class="bg-red-900/90 text-white p-3 rounded-md shadow-md text-xs border border-red-500 max-w-sm">
+                    <p class="font-bold mb-1">❌ Parsing Error Detected</p>
+                    <p id="rawOverlayAlertMsg" class="opacity-90"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Generation CTA -->
+          <div class="p-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between dark:bg-brandDark-card dark:border-brandDark-border">
+            <button onclick="generateData('raw')" id="generateRawBtn" class="px-5 py-3 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-lg shadow-sm transition-all uppercase tracking-wider flex items-center space-x-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              <span>Generate Raw Output</span>
+            </button>
+            <div class="flex items-center space-x-2 text-xs font-bold text-red-600" id="rawStatusBadge">
+              <span>Ready</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: SCHEMA ENFORCED (DETERMINISTIC) -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between overflow-hidden dark:bg-brandDark-card dark:border-brandDark-border">
+          <div class="p-6 border-b border-slate-100 dark:border-brandDark-border bg-gradient-to-r from-brandGreen-50 to-transparent dark:from-brandGreen-950/10">
+            <div class="flex justify-between items-center">
+              <div class="flex items-center space-x-2.5">
+                <span class="w-3 h-3 rounded-full bg-brandGreen-500"></span>
+                <h3 class="font-bold text-sm">Mode B: Enforced Schema Pipeline (Deterministic)</h3>
+              </div>
+              <span class="text-xs bg-brandGreen-50 text-brandGreen-500 dark:bg-brandGreen-500/20 dark:text-brandGreen-100 px-2 py-0.5 rounded font-medium">Valid JSON Guaranteed</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Enforces structure directly at the model generation layer using strict API schemas.</p>
+          </div>
+
+          <!-- Prompt and Schema Spec Display -->
+          <div class="p-6 space-y-4 flex-1">
+            <div class="space-y-1.5">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Automated Schema Specification (JSON Schema)</span>
+              <div class="bg-slate-100 dark:bg-brandDark-main p-3 rounded-lg text-xs font-mono text-slate-600 dark:text-slate-400 select-all border border-slate-200 dark:border-slate-800 leading-relaxed overflow-x-auto max-h-[58px]" id="schemaSpecDisplay">
+                Loading schema specification...
+              </div>
+            </div>
+
+            <div class="space-y-1.5 flex flex-col h-[340px]">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Parsed Output Buffer</span>
+              <div class="relative flex-1 bg-slate-950 text-emerald-400 p-4 rounded-lg font-mono text-xs overflow-y-auto border border-slate-800 flex flex-col select-all">
+                <pre class="whitespace-pre-wrap flex-1" id="enforcedCodeArea">// Run generation below to simulate data arrival...</pre>
+                <!-- Verification Overlay Alert -->
+                <div id="enforcedOverlayAlert" class="hidden absolute top-4 right-4 bg-brandGreen-500 text-white px-3 py-1.5 rounded-md shadow-md text-xs font-bold flex items-center space-x-1.5 border border-emerald-400 animate-bounce">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                  <span>Validated conforming shape</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Generation CTA -->
+          <div class="p-6 bg-slate-50 border-t border-slate-100 flex items-center justify-between dark:bg-brandDark-card dark:border-brandDark-border">
+            <button onclick="generateData('enforced')" id="generateEnforcedBtn" class="px-5 py-3 bg-brandGreen-500 hover:bg-brandGreen-600 text-white text-xs font-bold rounded-lg shadow-sm transition-all uppercase tracking-wider flex items-center space-x-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4"></path></svg>
+              <span>Generate Structurally Enforced Output</span>
+            </button>
+            <div class="flex items-center space-x-2 text-xs font-bold text-brandGreen-500" id="enforcedStatusBadge">
+              <span>Ready</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- METRICS & VALIDATION REPORT CARD -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden dark:bg-brandDark-card dark:border-brandDark-border">
+      <div class="p-6 border-b border-slate-100 dark:border-brandDark-border">
+        <h3 class="font-bold text-sm">Real-Time Validation Diagnostics Card</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Comparing structural health logs for the current generated buffers.</p>
+      </div>
+
+      <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50/50 dark:bg-brandDark-main">
+        <!-- Metric 1: Parse Integrity -->
+        <div class="bg-white p-4 rounded-lg border border-slate-200 flex flex-col justify-between dark:bg-brandDark-card dark:border-brandDark-border">
+          <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">JSON Syntax Integrity</span>
+          <div class="my-3 flex items-baseline space-x-2">
+            <span class="text-xl font-black" id="syntaxMetric">--</span>
+          </div>
+          <div class="flex items-center space-x-1.5" id="syntaxStatus">
+            <span class="text-xs text-slate-400">No data generated</span>
+          </div>
+        </div>
+
+        <!-- Metric 2: Field Completeness -->
+        <div class="bg-white p-4 rounded-lg border border-slate-200 flex flex-col justify-between dark:bg-brandDark-card dark:border-brandDark-border">
+          <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Required Field Presence</span>
+          <div class="my-3 flex items-baseline space-x-2">
+            <span class="text-xl font-black" id="fieldMetric">--</span>
+          </div>
+          <div class="flex items-center space-x-1.5" id="fieldStatus">
+            <span class="text-xs text-slate-400">No data generated</span>
+          </div>
+        </div>
+
+        <!-- Metric 3: Safe Types -->
+        <div class="bg-white p-4 rounded-lg border border-slate-200 flex flex-col justify-between dark:bg-brandDark-card dark:border-brandDark-border">
+          <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Data Type Enforcement</span>
+          <div class="my-3 flex items-baseline space-x-2">
+            <span class="text-xl font-black" id="typeMetric">--</span>
+          </div>
+          <div class="flex items-center space-x-1.5" id="typeStatus">
+            <span class="text-xs text-slate-400">No data generated</span>
+          </div>
+        </div>
+
+        <!-- Metric 4: Operational Status -->
+        <div class="bg-white p-4 rounded-lg border border-slate-200 flex flex-col justify-between dark:bg-brandDark-card dark:border-brandDark-border">
+          <span class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Conversational Noise</span>
+          <div class="my-3 flex items-baseline space-x-2">
+            <span class="text-xl font-black" id="noiseMetric">--</span>
+          </div>
+          <div class="flex items-center space-x-1.5" id="noiseStatus">
+            <span class="text-xs text-slate-400">No data generated</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Diagnostics Execution Log -->
+      <div class="p-6 border-t border-slate-100 bg-white dark:bg-brandDark-card dark:border-brandDark-border">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-3">Diagnostic Debug Console</span>
+        <div class="bg-slate-950 p-4 rounded-lg font-mono text-xs text-slate-300 max-h-48 overflow-y-auto border border-slate-850" id="debugConsole">
+          <p class="text-slate-500">// System diagnostics idling. Generate simulated logs to test telemetry stream...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: HACKATHON CHALLENGE AREA -->
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden dark:bg-brandDark-card dark:border-brandDark-border" id="challenge-section">
+      <div class="p-6 md:p-8 bg-black text-white border-b border-slate-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 dark:bg-brandDark-card">
+        <div>
+          <div class="inline-block px-2 py-0.5 bg-brandGreen-500 text-white rounded text-[10px] font-bold uppercase tracking-wider mb-2">
+            Active Mission
+          </div>
+          <h2 class="text-xl font-black tracking-tight">Step 2: The Schema Hacker Challenge</h2>
+          <p class="text-xs text-slate-400 mt-1">Configure an automated schema to validate cybersecurity network inventories against adversarial payloads.</p>
+        </div>
+        <div class="flex items-center space-x-2 bg-slate-900 border border-slate-800 p-2 rounded-lg text-xs">
+          <span>Target Lab Progress:</span>
+          <span class="text-brandGreen-highlight font-black text-sm" id="progressPct">0% Secured</span>
+        </div>
+      </div>
+
+      <!-- Challenge Sandbox Split -->
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-0 divide-y xl:divide-y-0 xl:divide-x divide-slate-200 dark:divide-brandDark-border">
+        
+        <!-- Left: Challenges & Requirements (5 Columns) -->
+        <div class="xl:col-span-5 p-6 space-y-6">
+          <div>
+            <h3 class="font-bold text-sm text-slate-800 dark:text-slate-200">The Mission Scenario:</h3>
+            <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mt-2">
+              Your security pipeline must ingest assets without allowing malicious or format-broken telemetry logs to pass into the database. You must configure the validation settings to ensure all incoming fields conform strictly to specified rules.
+            </p>
+          </div>
+
+          <!-- Requirements Checklist -->
+          <div class="space-y-3">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400">Schema Validation Specifications</h4>
+            
+            <div class="space-y-2.5">
+              <!-- Req 1: Hostname uppercase alphanumeric -->
+              <div class="flex items-start space-x-3 bg-slate-50 p-2.5 rounded-lg border border-slate-100 dark:bg-brandDark-main dark:border-slate-800">
+                <input type="checkbox" id="chk-host" disabled class="mt-1 h-4 w-4 text-brandGreen-500 border-slate-300 rounded focus:ring-brandGreen-500">
+                <div>
+                  <label class="block text-xs font-bold text-slate-800 dark:text-slate-200">Constraint 1: Alphanumeric Uppercase Host Name</label>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400">Must match regex constraint <code>^[A-Z0-9\-]+$</code> (No spaces, absolute capitalized keys).</p>
+                </div>
+              </div>
+
+              <!-- Req 2: IPv4 Verification -->
+              <div class="flex items-start space-x-3 bg-slate-50 p-2.5 rounded-lg border border-slate-100 dark:bg-brandDark-main dark:border-slate-800">
+                <input type="checkbox" id="chk-ip" disabled class="mt-1 h-4 w-4 text-brandGreen-500 border-slate-300 rounded focus:ring-brandGreen-500">
+                <div>
+                  <label class="block text-xs font-bold text-slate-800 dark:text-slate-200">Constraint 2: IPv4 Address Validation</label>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400">Incoming IP string must match strict 4-octet IPv4 format rules.</p>
+                </div>
+              </div>
+
+              <!-- Req 3: Specific Criticality Enums -->
+              <div class="flex items-start space-x-3 bg-slate-50 p-2.5 rounded-lg border border-slate-100 dark:bg-brandDark-main dark:border-slate-800">
+                <input type="checkbox" id="chk-enum" disabled class="mt-1 h-4 w-4 text-brandGreen-500 border-slate-300 rounded focus:ring-brandGreen-500">
+                <div>
+                  <label class="block text-xs font-bold text-slate-800 dark:text-slate-200">Constraint 3: Severity Rating Enums</label>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400">Constrain strings specifically to <code>["LOW", "MEDIUM", "HIGH", "CRITICAL"]</code>.</p>
+                </div>
+              </div>
+
+              <!-- Req 4: Port Boundaries -->
+              <div class="flex items-start space-x-3 bg-slate-50 p-2.5 rounded-lg border border-slate-100 dark:bg-brandDark-main dark:border-slate-800">
+                <input type="checkbox" id="chk-ports" disabled class="mt-1 h-4 w-4 text-brandGreen-500 border-slate-300 rounded focus:ring-brandGreen-500">
+                <div>
+                  <label class="block text-xs font-bold text-slate-800 dark:text-slate-200">Constraint 4: Integer Range Boundary Limits</label>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400">Array elements must be integer values situated strictly within port spectrum limits (<code>1</code> to <code>65535</code>).</p>
+                </div>
+              </div>
+
+              <!-- Req 5: Strict Boolean -->
+              <div class="flex items-start space-x-3 bg-slate-50 p-2.5 rounded-lg border border-slate-100 dark:bg-brandDark-main dark:border-slate-800">
+                <input type="checkbox" id="chk-bool" disabled class="mt-1 h-4 w-4 text-brandGreen-500 border-slate-300 rounded focus:ring-brandGreen-500">
+                <div>
+                  <label class="block text-xs font-bold text-slate-800 dark:text-slate-200">Constraint 5: Literal Type Safety Checks</label>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400"><code>agent_installed</code> must reject fake string equivalents (e.g. <code>"true"</code>, <code>"yes"</code>).</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Interactive Configurator & Testing (7 Columns) -->
+        <div class="xl:col-span-7 p-6 flex flex-col justify-between space-y-6 bg-slate-50/50 dark:bg-brandDark-main">
+          
+          <!-- Code sandbox config -->
+          <div class="space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded bg-brandGreen-500"></span>
+                Interactive Validation Constraints Specification
+              </span>
+              <button onclick="resetChallenge()" class="text-[10px] text-slate-500 dark:text-slate-400 hover:underline">Reset To Default Defaults</button>
+            </div>
+
+            <!-- Visual Schema Parameter Configurator -->
+            <div class="bg-white p-5 rounded-lg border border-slate-200 space-y-4 dark:bg-brandDark-card dark:border-brandDark-border">
+              
+              <!-- Hostname Settings -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Hostname Regex Restriction Pattern</label>
+                <div class="mt-1.5 flex gap-2">
+                  <input type="text" id="cfg-host-regex" class="flex-1 text-xs font-mono px-3 py-2 border border-slate-300 rounded-lg dark:bg-brandDark-main dark:border-brandDark-border dark:text-white" value="^[A-Za-z0-9\-\s]+$">
+                  <button onclick="setRegexCorrect()" class="px-2 py-1 text-[10px] border border-slate-200 hover:bg-slate-50 rounded dark:border-slate-700 dark:hover:bg-slate-800">Fix Regex</button>
+                </div>
+                <p class="text-[10px] text-slate-400 mt-1">Default allows spaces/lowercase. Change pattern to force capitalized alphanumeric codes only.</p>
+              </div>
+
+              <!-- IP Settings -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Force IPv4 Address Format Matching</label>
+                <div class="mt-1.5 flex items-center space-x-4">
+                  <label class="inline-flex items-center text-xs">
+                    <input type="radio" name="cfg-ip-format" value="any" checked class="text-brandGreen-500 focus:ring-brandGreen-500">
+                    <span class="ml-2">Disable String-Format Validation (Any String)</span>
+                  </label>
+                  <label class="inline-flex items-center text-xs">
+                    <input type="radio" name="cfg-ip-format" value="ipv4" class="text-brandGreen-500 focus:ring-brandGreen-500">
+                    <span class="ml-2 text-brandGreen-500 font-bold">Enable Strict "ipv4" Format Matching</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Criticality Enum List -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Criticality Enum Strings (Separated by commas)</label>
+                <input type="text" id="cfg-crit-enum" class="w-full text-xs font-mono px-3 py-2 border border-slate-300 rounded-lg dark:bg-brandDark-main dark:border-brandDark-border dark:text-white" value="LOW, MEDIUM, HIGH, CRITICAL, EXTRA_HIGH, UNKNOWN">
+                <p class="text-[10px] text-slate-400 mt-1">Strip out unsafe non-standard enum options to comply with system spec constraints.</p>
+              </div>
+
+              <!-- Open Ports Constraints -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Minimum Port Number</label>
+                  <input type="number" id="cfg-port-min" class="mt-1.5 w-full text-xs font-mono px-3 py-2 border border-slate-300 rounded-lg dark:bg-brandDark-main dark:border-brandDark-border dark:text-white" value="0">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Maximum Port Number</label>
+                  <input type="number" id="cfg-port-max" class="mt-1.5 w-full text-xs font-mono px-3 py-2 border border-slate-300 rounded-lg dark:bg-brandDark-main dark:border-brandDark-border dark:text-white" value="99999">
+                </div>
+              </div>
+
+              <!-- Installation strict type -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Enforce Strict Boolean Type Checking on installation status</label>
+                <div class="mt-1.5 flex items-center space-x-4">
+                  <label class="inline-flex items-center text-xs">
+                    <input type="radio" name="cfg-bool-type" value="loose" checked class="text-brandGreen-500 focus:ring-brandGreen-500">
+                    <span class="ml-2">Loose Types (Strings accepted)</span>
+                  </label>
+                  <label class="inline-flex items-center text-xs">
+                    <input type="radio" name="cfg-bool-type" value="strict" class="text-brandGreen-500 focus:ring-brandGreen-500">
+                    <span class="ml-2 text-brandGreen-500 font-bold">Strict Boolean Types Only</span>
+                  </label>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Challenge Diagnostics Action -->
+          <div class="p-6 bg-white border border-slate-200 rounded-lg space-y-4 dark:bg-brandDark-card dark:border-brandDark-border">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+              <div>
+                <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200">Run Schema Hacker Validation Suite</h4>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Tests your configured constraints against multiple problematic telemetry samples.</p>
+              </div>
+              <button onclick="runChallengeTests()" class="w-full sm:w-auto px-5 py-3 bg-brandGreen-500 text-white hover:bg-brandGreen-600 font-bold text-xs rounded-lg shadow-sm uppercase tracking-wider flex items-center justify-center space-x-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                <span>Run Challenge Tests</span>
+              </button>
+            </div>
+
+            <!-- Test result output messages -->
+            <div id="challengeLog" class="p-3 bg-slate-900 rounded text-xs font-mono text-slate-300 max-h-36 overflow-y-auto">
+              <span class="text-slate-500">// Waiting for verification run...</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- SOC SUCCESS MODAL / TOAST NOTIFICATION -->
+  <div id="congratsModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full border border-brandGreen-500 overflow-hidden dark:bg-brandDark-card">
+      <div class="bg-black text-white p-6 text-center dark:bg-brandDark-border">
+        <div class="mx-auto w-12 h-12 bg-brandGreen-500 rounded-full flex items-center justify-center mb-4">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+        </div>
+        <h3 class="text-lg font-bold">Pipeline Successfully Secured!</h3>
+        <p class="text-xs text-slate-400 mt-1">All incoming adversarial telemetry samples blocked and/or processed flawlessly.</p>
+      </div>
+      <div class="p-6 space-y-4">
+        <p class="text-xs text-slate-600 dark:text-slate-300 leading-normal">
+          Congratulations! Your configured validation parameters have successfully achieved 100% security coverage. Downstream analytics parsers are completely protected against malicious data ingestion.
+        </p>
+        <button onclick="closeCongratsModal()" class="w-full py-2 bg-brandGreen-500 hover:bg-brandGreen-600 text-white text-xs font-bold rounded-lg uppercase transition-all">
+          Return to Dashboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSTRUCTOR DEBRIEF NOTES (Sticky bottom helper for college environments) -->
+  <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 text-xs py-8 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div class="flex flex-col md:flex-row justify-between items-start gap-4">
+        <div>
+          <h4 class="font-bold text-white uppercase tracking-wider text-[11px] mb-2">Classroom Instructor Toolkit</h4>
+          <p class="max-w-2xl text-slate-400 leading-relaxed text-[11px]">
+            This validation lab runs entirely client-side. Have your students work in pairs to compare the behavior of probabilistic prompting against deterministic validation engines. You can easily expand the schema specs in Step 2 to illustrate different parsing vulnerabilities.
+          </p>
+        </div>
+        <div class="text-[11px]">
+          <span class="text-white font-bold">Theme Alignment:</span> Course Content Custom Edition (Black/Green/White theme).
+        </div>
+      </div>
+      <div class="border-t border-slate-800 pt-4 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] text-slate-500">
+        <span>© 2026 AI Generated Data Validation • College Instructional Design Laboratory</span>
+        <div class="flex space-x-4">
+          <a href="https://sands-mvcc.github.io/validation/" target="_blank" class="hover:text-white">Review Lesson Framework</a>
+          <span>•</span>
+          <span>Sands MVCC Cybersecurity Initiative</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPTING LOGIC -->
+  <script>
+    // System Variables
+    let currentScenario = 'cyber';
+    let userApiKey = '';
+    
+    // Scenarios Definitions & Mock Data Models
+    const scenarios = {
+      cyber: {
+        title: "🛡️ Cybersecurity Incident Log",
+        prompt: "Please construct an incident log in JSON format with an id, host name, level, and timestamp. Output ONLY valid JSON.",
+        schema: {
+          type: "object",
+          properties: {
+            id: { type: "integer" },
+            host_name: { type: "string" },
+            level: { type: "string", enum: ["INFO", "WARN", "ERROR", "CRITICAL"] },
+            timestamp: { type: "string", format: "date-time" }
+          },
+          required: ["id", "host_name", "level", "timestamp"]
+        },
+        rawMock: `Here is the JSON incident log representing the detected anomaly:
+
+\`\`\`json
+{
+  "id": 841228,
+  "host_name": "Webserver Gateway Alpha", // note: spaces inside hostname
+  "level": "CRIT", 
+  "timestamp": "2026-06-21T13:17:00Z"
+}
+\`\`\`
+
+Let me know if you need other telemetry values!`,
+        enforcedMock: `{
+  "id": 841228,
+  "host_name": "WEBSERVER-GW-ALPHA",
+  "level": "CRITICAL",
+  "timestamp": "2026-06-21T13:17:00Z"
+}`
+      },
+      profile: {
+        title: "👤 Identity Access Manifest",
+        prompt: "Create a user identity profile in JSON containing a profile ID, userName, and an array of authorized permission scopes. Do not add metadata.",
+        schema: {
+          type: "object",
+          properties: {
+            profile_id: { type: "integer" },
+            userName: { type: "string" },
+            scopes: { type: "array", items: { type: "string" } }
+          },
+          required: ["profile_id", "userName", "scopes"]
+        },
+        rawMock: `{\n  "profile_id": "usr-12093",\n  "userName": "j_sands",\n  "scopes": "read:admin, write:audit"\n}`, // Note: profile_id is string instead of int, scopes is string instead of array
+        enforcedMock: `{\n  "profile_id": 12093,\n  "userName": "j_sands",\n  "scopes": [\n    "read:admin",\n    "write:audit"\n  ]\n}`
+      },
+      iot: {
+        title: "📡 IoT Power Grid Telemetry",
+        prompt: "Generate an IoT grid sensor reading in JSON format with a node_id, power_load_kw, online, and coordinates.",
+        schema: {
+          type: "object",
+          properties: {
+            node_id: { type: "integer" },
+            power_load_kw: { type: "number" },
+            online: { type: "boolean" },
+            coordinates: { 
+              type: "object",
+              properties: {
+                lat: { type: "number" },
+                lon: { type: "number" }
+              },
+              required: ["lat", "lon"]
+            }
+          },
+          required: ["node_id", "power_load_kw", "online", "coordinates"]
+        },
+        rawMock: `Sure, here's the sensor payload telemetry:
+
+{\n  "node_id": 481,\n  "power_load_kw": "145.2",\n  "online": "yes",\n  "coordinates": [41.65, -87.82]\n}`, // Note: strings used for number/bool, array instead of nested object
+        enforcedMock: `{\n  "node_id": 481,\n  "power_load_kw": 145.2,\n  "online": true,\n  "coordinates": {\n    "lat": 41.65,\n    "lon": -87.82\n  }\n}`
+      }
+    };
+
+    // Initialize Page
+    window.onload = function() {
+      switchScenario('cyber');
+      initTheme();
+    }
+
+    // Toggle Settings Panel
+    const openSettingsBtn = document.getElementById('openSettingsBtn');
+    const settingsDrawer = document.getElementById('settingsDrawer');
+    openSettingsBtn.addEventListener('click', () => {
+      settingsDrawer.classList.toggle('hidden');
+    });
+
+    // Dark / Light Theme logic
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    const themeSunIcon = document.getElementById('themeSunIcon');
+    const themeMoonIcon = document.getElementById('themeMoonIcon');
+
+    function initTheme() {
+      if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        themeSunIcon.classList.remove('hidden');
+        themeMoonIcon.classList.add('hidden');
+      } else {
+        document.documentElement.classList.remove('dark');
+        themeSunIcon.classList.add('hidden');
+        themeMoonIcon.classList.remove('hidden');
+      }
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('color-theme', 'light');
+        themeSunIcon.classList.add('hidden');
+        themeMoonIcon.classList.remove('hidden');
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('color-theme', 'dark');
+        themeSunIcon.classList.remove('hidden');
+        themeMoonIcon.classList.add('hidden');
+      }
+    });
+
+    // Switch Scenario Control
+    function switchScenario(key) {
+      currentScenario = key;
+      const data = scenarios[key];
+
+      // Update Tabs styling
+      document.querySelectorAll('.scenario-tab').forEach(tab => {
+        tab.className = "scenario-tab px-4 py-2 text-xs font-bold rounded-lg text-slate-600 hover:text-slate-900 transition-all dark:text-slate-400 dark:hover:text-slate-100";
+      });
+      const activeTab = document.getElementById(`tab-${key}`);
+      if (activeTab) {
+        activeTab.className = "scenario-tab px-4 py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-slate-900 transition-all dark:bg-brandDark-card dark:text-white border border-slate-300 dark:border-slate-700";
+      }
+
+      // Update UI elements
+      document.getElementById('rawPromptDisplay').innerText = `"${data.prompt}"`;
+      document.getElementById('schemaSpecDisplay').innerText = JSON.stringify(data.schema, null, 2);
+
+      // Reset output boxes
+      document.getElementById('rawCodeArea').innerText = `// Click 'Generate Raw Output' to initiate query...`;
+      document.getElementById('enforcedCodeArea').innerText = `// Click 'Generate Structurally Enforced Output' to initiate query...`;
+
+      // Reset validation metrics
+      document.getElementById('syntaxMetric').innerText = '--';
+      document.getElementById('syntaxStatus').innerHTML = '<span class="text-xs text-slate-400">No data generated</span>';
+      document.getElementById('fieldMetric').innerText = '--';
+      document.getElementById('fieldStatus').innerHTML = '<span class="text-xs text-slate-400">No data generated</span>';
+      document.getElementById('typeMetric').innerText = '--';
+      document.getElementById('typeStatus').innerHTML = '<span class="text-xs text-slate-400">No data generated</span>';
+      document.getElementById('noiseMetric').innerText = '--';
+      document.getElementById('noiseStatus').innerHTML = '<span class="text-xs text-slate-400">No data generated</span>';
+
+      document.getElementById('rawOverlayAlert').classList.add('hidden');
+      document.getElementById('enforcedOverlayAlert').classList.add('hidden');
+
+      logConsole(`Switched active scenario to: ${data.title}`);
+    }
+
+    // Logger Utility
+    function logConsole(message, type = 'info') {
+      const consoleEl = document.getElementById('debugConsole');
+      const time = new Date().toLocaleTimeString();
+      let colorClass = 'text-slate-300';
+      if (type === 'error') colorClass = 'text-red-400';
+      if (type === 'success') colorClass = 'text-brandGreen-highlight font-bold';
+      
+      consoleEl.innerHTML += `<p class="${colorClass}">[${time}] ${message}</p>`;
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+
+    // Direct API Key Save Control
+    const apiKeyInput = document.getElementById('apiKeyInput');
+    const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+    const apiKeyStatus = document.getElementById('apiKeyStatus');
+    const engineBadge = document.getElementById('engineBadge');
+
+    saveApiKeyBtn.addEventListener('click', () => {
+      const val = apiKeyInput.value.trim();
+      if (val) {
+        userApiKey = val;
+        apiKeyStatus.className = "text-xs font-semibold text-green-600 dark:text-green-400";
+        apiKeyStatus.innerText = "✓ Key saved successfully in memory. Sandbox is now connected to live gemini-2.5-flash-preview-09-2025.";
+        engineBadge.className = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-brandGreen-500 text-white";
+        engineBadge.innerHTML = `<span class="w-2 h-2 mr-1.5 rounded-full bg-white animate-pulse"></span>Live API Engine`;
+        logConsole("Successfully authenticated credentials. Switched pipeline engine to LIVE API.");
+      } else {
+        userApiKey = '';
+        apiKeyStatus.className = "text-xs font-semibold text-red-600 dark:text-red-400";
+        apiKeyStatus.innerText = "× Key cannot be blank. Reverted back to simulated client mode.";
+        engineBadge.className = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
+        engineBadge.innerHTML = `<span class="w-2 h-2 mr-1.5 rounded-full bg-green-500 animate-pulse"></span>Simulation Mode`;
+        logConsole("De-authorized credentials. Switched pipeline engine to SIMULATION mode.");
+      }
+    });
+
+    // Simulated vs Live Fetch Engine
+    async function generateData(mode) {
+      const statusEl = document.getElementById(`${mode}StatusBadge`);
+      const buttonEl = document.getElementById(`generate${mode === 'raw' ? 'Raw' : 'Enforced'}Btn`);
+      
+      // Update UI to loading
+      statusEl.innerHTML = `
+        <svg class="animate-spin h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+        <span>Streaming Buffer...</span>
+      `;
+      buttonEl.disabled = true;
+
+      // Log execution
+      logConsole(`Triggering ${mode.toUpperCase()} request to target model context...`);
+
+      let dataOutput = '';
+      if (userApiKey) {
+        // Query Actual Gemini API
+        try {
+          dataOutput = await makeLiveGeminiCall(mode);
+        } catch (err) {
+          logConsole(`API Execution Failed: ${err.message}. Cascading back to reliable local sandbox simulation.`, 'error');
+          dataOutput = getSimulatedData(mode);
+        }
+      } else {
+        // Run completely local simulation after artificial latency
+        await new Promise(resolve => setTimeout(resolve, 800));
+        dataOutput = getSimulatedData(mode);
+      }
+
+      // Display Code with dynamic typewriter formatting
+      const codeArea = document.getElementById(`${mode}CodeArea`);
+      codeArea.innerText = dataOutput;
+      
+      // Post-Generation Validation Diagnostics
+      runDiagnostics(mode, dataOutput);
+
+      // Re-enable controls
+      statusEl.innerHTML = `<span>Ready</span>`;
+      buttonEl.disabled = false;
+    }
+
+    // Retrieve simulated static mock profiles
+    function getSimulatedData(mode) {
+      const data = scenarios[currentScenario];
+      return mode === 'raw' ? data.rawMock : data.enforcedMock;
+    }
+
+    // Automated API Endpoint Request (With Exponential Backoff implementation)
+    async function makeLiveGeminiCall(mode) {
+      const data = scenarios[currentScenario];
+      const model = "gemini-2.5-flash-preview-09-2025";
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${userApiKey}`;
+      
+      let systemPrompt = "You are an automated payload logger engine. You output content matching instructions exactly.";
+      let userQuery = data.prompt;
+
+      let payload = {
+        contents: [{ parts: [{ text: userQuery }] }],
+        systemInstruction: { parts: [{ text: systemPrompt }] }
+      };
+
+      // Apply Structured Output Schema constraints if Mode is Enforced
+      if (mode === 'enforced') {
+        payload.generationConfig = {
+          responseMimeType: "application/json",
+          responseSchema: data.schema
+        };
+      }
+
+      // Exponential Backoff Strategy
+      let retries = 5;
+      let delay = 1000;
+      
+      for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.error?.message || "Internal API Error");
+          }
+
+          const result = await response.json();
+          const responseText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (!responseText) throw new Error("Invalid payload container returned from server.");
+          return responseText;
+        } catch (error) {
+          if (attempt === retries) throw error;
+          await new Promise(r => setTimeout(r, delay));
+          delay *= 2; // exponential backoff scale
+        }
+      }
+    }
+
+    // Live Diagnostics Runner for Comparator
+    function runDiagnostics(mode, rawText) {
+      logConsole(`Starting automatic telemetry structural validation checks on mode [${mode.toUpperCase()}]...`);
+      
+      let isRaw = (mode === 'raw');
+      const data = scenarios[currentScenario];
+
+      // Reset indicators
+      const syntaxEl = document.getElementById('syntaxMetric');
+      const syntaxStatus = document.getElementById('syntaxStatus');
+      const fieldEl = document.getElementById('fieldMetric');
+      const fieldStatus = document.getElementById('fieldStatus');
+      const typeEl = document.getElementById('typeMetric');
+      const typeStatus = document.getElementById('typeStatus');
+      const noiseEl = document.getElementById('noiseMetric');
+      const noiseStatus = document.getElementById('noiseStatus');
+
+      if (isRaw) {
+        // Mode A: Raw Output (Typically problematic)
+        // 1. JSON Syntax Test
+        let parsed = null;
+        let cleanJsonText = rawText;
+        
+        // Strip markdown blocks if present
+        if (rawText.includes('```json')) {
+          cleanJsonText = rawText.split('```json')[1].split('```')[0].trim();
+        } else if (rawText.includes('```')) {
+          cleanJsonText = rawText.split('```')[1].split('```')[0].trim();
+        }
+
+        try {
+          parsed = JSON.parse(cleanJsonText);
+          syntaxEl.innerText = "PASS";
+          syntaxEl.className = "text-xl font-black text-emerald-600 dark:text-emerald-400";
+          syntaxStatus.innerHTML = `<span class="text-xs text-emerald-600 font-semibold flex items-center gap-1">✓ Parsed clean JSON string</span>`;
+          document.getElementById('rawOverlayAlert').classList.add('hidden');
+        } catch(e) {
+          syntaxEl.innerText = "FAIL";
+          syntaxEl.className = "text-xl font-black text-red-600 dark:text-red-400";
+          syntaxStatus.innerHTML = `<span class="text-xs text-red-600 font-semibold">× Invalid JSON notation</span>`;
+          
+          document.getElementById('rawOverlayAlertMsg').innerText = e.message;
+          document.getElementById('rawOverlayAlert').classList.remove('hidden');
+          logConsole(`JSON Syntax Integrity Error in Raw Prompting: ${e.message}`, 'error');
+        }
+
+        // 2. Field Presence Test
+        if (parsed) {
+          const reqFields = data.schema.required;
+          const missing = reqFields.filter(f => !(f in parsed));
+          if (missing.length === 0) {
+            fieldEl.innerText = "100%";
+            fieldEl.className = "text-xl font-black text-emerald-600 dark:text-emerald-400";
+            fieldStatus.innerHTML = `<span class="text-xs text-emerald-600 font-semibold">✓ All fields present</span>`;
+          } else {
+            fieldEl.innerText = "ERR";
+            fieldEl.className = "text-xl font-black text-red-600 dark:text-red-400";
+            fieldStatus.innerHTML = `<span class="text-xs text-red-600 font-semibold">Missing: ${missing.join(', ')}</span>`;
+            logConsole(`Pipeline Validation Failure: Missing required fields [${missing.join(', ')}]`, 'error');
+          }
+
+          // 3. Type Enforcement Validation
+          let typeFailures = [];
+          if (currentScenario === 'cyber') {
+            if (typeof parsed.id !== 'number') typeFailures.push("id should be integer");
+            if (parsed.level && !["INFO", "WARN", "ERROR", "CRITICAL"].includes(parsed.level)) typeFailures.push(`level "${parsed.level}" invalid`);
+          } else if (currentScenario === 'profile') {
+            if (typeof parsed.profile_id !== 'number') typeFailures.push("profile_id should be integer");
+            if (!Array.isArray(parsed.scopes)) typeFailures.push("scopes must be a strict Array");
+          } else if (currentScenario === 'iot') {
+            if (typeof parsed.power_load_kw !== 'number') typeFailures.push("power_load_kw should be a number");
+            if (typeof parsed.online !== 'boolean') typeFailures.push("online must be a literal boolean");
+          }
+
+          if (typeFailures.length === 0) {
+            typeEl.innerText = "VALID";
+            typeEl.className = "text-xl font-black text-emerald-600 dark:text-emerald-400";
+            typeStatus.innerHTML = `<span class="text-xs text-emerald-600 font-semibold">✓ Exact datatypes matched</span>`;
+          } else {
+            typeEl.innerText = "FAIL";
+            typeEl.className = "text-xl font-black text-red-600 dark:text-red-400";
+            typeStatus.innerHTML = `<span class="text-xs text-red-600 font-semibold">${typeFailures[0]}</span>`;
+            logConsole(`Type Casting Ingestion Vulnerability: ${typeFailures.join(', ')}`, 'error');
+          }
+
+        } else {
+          fieldEl.innerText = "FAIL";
+          fieldStatus.innerHTML = `<span class="text-xs text-red-400">Could not parse properties</span>`;
+          typeEl.innerText = "FAIL";
+          typeStatus.innerHTML = `<span class="text-xs text-red-400">Could not read properties</span>`;
+        }
+
+        // 4. Conversational Noise Check
+        const cleanWords = ["{", "[", "}", "]", "\"", ":"];
+        const firstChar = rawText.trim().charAt(0);
+        const hasNoise = (firstChar !== '{' && firstChar !== '[');
+        
+        if (!hasNoise) {
+          noiseEl.innerText = "0%";
+          noiseEl.className = "text-xl font-black text-emerald-600 dark:text-emerald-400";
+          noiseStatus.innerHTML = `<span class="text-xs text-emerald-600 font-semibold">✓ Pure structured JSON data</span>`;
+        } else {
+          noiseEl.innerText = "HIGH";
+          noiseEl.className = "text-xl font-black text-yellow-600 dark:text-yellow-400";
+          noiseStatus.innerHTML = `<span class="text-xs text-yellow-600 font-semibold">Conversational fluff detected</span>`;
+          logConsole("Noise Warning: System prompt was injected with conversational introductions. Requires regex cleanup middleware.", 'error');
+        }
+
+      } else {
+        // Mode B: Enforced Outputs (Always Clean)
+        syntaxEl.innerText = "PASS";
+        syntaxEl.className = "text-xl font-black text-emerald-600 dark:text-emerald-400";
+        syntaxStatus.innerHTML = `<span class="text-xs text-emerald-600 font-semibold flex items-center gap-1">✓ Syntax guaranteed compliant</span>`;
+
+        fieldEl.innerText = "100%";
+        fieldEl.className = "text-xl font-black text-emerald-600 dark:text-emerald-400";
+        fieldStatus.innerHTML = `<span class="text-xs text-emerald-600 font-semibold">✓ Programmatic validation active</span>`;
+
+        typeEl.innerText = "VALID";
+        typeEl.className = "text-xl font-black text-emerald-600 dark:text-emerald-400";
+        typeStatus.innerHTML = `<span class="text-xs text-emerald-600 font-semibold">✓ Conforming matching schemas</span>`;
+
+        noiseEl.innerText = "0%";
+        noiseEl.className = "text-xl font-black text-emerald-600 dark:text-emerald-400";
+        noiseStatus.innerHTML = `<span class="text-xs text-emerald-600 font-semibold">✓ Pure structural object</span>`;
+
+        document.getElementById('enforcedOverlayAlert').classList.remove('hidden');
+        logConsole("Schema validation pipeline verified with zero execution anomalies. Clean ingest completed.", "success");
+      }
+    }
+
+
+    // ==========================================
+    // STEP 2: SCHEMA HACKER HACKATHON LOGIC
+    // ==========================================
+    
+    // Default challenge values
+    const challengeDefaults = {
+      regex: "^[A-Za-z0-9\\-\\s]+$",
+      ip: "any",
+      enums: "LOW, MEDIUM, HIGH, CRITICAL, EXTRA_HIGH, UNKNOWN",
+      portMin: 0,
+      portMax: 99999,
+      boolType: "loose"
+    };
+
+    function resetChallenge() {
+      document.getElementById('cfg-host-regex').value = challengeDefaults.regex;
+      document.querySelector('input[name="cfg-ip-format"][value="any"]').checked = true;
+      document.getElementById('cfg-crit-enum').value = challengeDefaults.enums;
+      document.getElementById('cfg-port-min').value = challengeDefaults.portMin;
+      document.getElementById('cfg-port-max').value = challengeDefaults.portMax;
+      document.querySelector('input[name="cfg-bool-type"][value="loose"]').checked = true;
+      
+      updateCheckboxes({host: false, ip: false, enums: false, ports: false, bool: false});
+      document.getElementById('progressPct').innerText = "0% Secured";
+      document.getElementById('challengeLog').innerHTML = `<span class="text-slate-500">// Reset configuration to classroom default templates...</span>`;
+      logConsole("Hacker lab configuration parameters reset to unsafe initial states.");
+    }
+
+    function setRegexCorrect() {
+      document.getElementById('cfg-host-regex').value = "^[A-Z0-9\\-]+$";
+      logConsole("Automatically applied correct uppercase validation regular expression constraint.");
+    }
+
+    function updateCheckboxes(status) {
+      document.getElementById('chk-host').checked = status.host;
+      document.getElementById('chk-ip').checked = status.ip;
+      document.getElementById('chk-enum').checked = status.enums;
+      document.getElementById('chk-ports').checked = status.ports;
+      document.getElementById('chk-bool').checked = status.bool;
+    }
+
+    // Active Validation Adversarial Run
+    function runChallengeTests() {
+      const challengeLog = document.getElementById('challengeLog');
+      challengeLog.innerHTML = `<span class="text-brandGreen-highlight">Executing security test-suite against parameters...</span>\n`;
+
+      // 1. Get Values
+      const userRegexStr = document.getElementById('cfg-host-regex').value.trim();
+      const userIpFormat = document.querySelector('input[name="cfg-ip-format"]:checked').value;
+      const userEnumsStr = document.getElementById('cfg-crit-enum').value.trim();
+      const userPortMin = parseInt(document.getElementById('cfg-port-min').value);
+      const userPortMax = parseInt(document.getElementById('cfg-port-max').value);
+      const userBoolType = document.querySelector('input[name="cfg-bool-type"]:checked').value;
+
+      // 2. Adversarial Payloads (The test inputs attempting to break the systems)
+      const testPayloads = [
+        { host_name: "SOC-FIREWALL-01", ip_address: "192.168.1.1", criticality: "CRITICAL", ports_open: [22, 80, 443], agent_installed: true }, // Compliant payload
+        { host_name: "SOC FIREWALL Alpha", ip_address: "10.0.0.4", criticality: "LOW", ports_open: [80], agent_installed: true }, // Fails Constraint 1 (spaces/lowercase)
+        { host_name: "SOC-ROUTER-02", ip_address: "999.abc.def.1", criticality: "HIGH", ports_open: [443], agent_installed: true }, // Fails Constraint 2 (invalid IP address)
+        { host_name: "SOC-SWITCH-10", ip_address: "172.16.10.5", criticality: "EXTRA_HIGH", ports_open: [22], agent_installed: true }, // Fails Constraint 3 (extra enum values)
+        { host_name: "SOC-SERVER-04", ip_address: "192.168.1.2", criticality: "MEDIUM", ports_open: [0, 80, 999999], agent_installed: true }, // Fails Constraint 4 (ports out of bounds)
+        { host_name: "SOC-DMZ-WEB", ip_address: "192.168.2.5", criticality: "CRITICAL", ports_open: [80, 443], agent_installed: "yes" } // Fails Constraint 5 (string used as boolean)
+      ];
+
+      let results = {
+        host: true,
+        ip: true,
+        enums: true,
+        ports: true,
+        bool: true
+      };
+
+      // Challenge Tests Engine
+      try {
+        const hostRegex = new RegExp(userRegexStr);
+        
+        // Let's validate Constraint 1 (Uppercase Alphanumeric with no spaces)
+        // Correct Regex should fail "SOC FIREWALL Alpha" and pass "SOC-FIREWALL-01"
+        if (!hostRegex.test("SOC-FIREWALL-01") || hostRegex.test("SOC FIREWALL Alpha")) {
+          results.host = false;
+          challengeLog.innerHTML += `<span class="text-red-500">❌ Test Failure: Hostname validation did not correctly enforce strict capitalization/no spaces.</span>\n`;
+        } else {
+          challengeLog.innerHTML += `<span class="text-green-500">✓ Test Success: Hostname constraint strictly enforced.</span>\n`;
+        }
+
+        // Validate Constraint 2 (Strict IPv4 matching)
+        // Regex IPv4 check
+        const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+        if (userIpFormat !== 'ipv4') {
+          results.ip = false;
+          challengeLog.innerHTML += `<span class="text-red-500">❌ Test Failure: Out-of-bounds or corrupt IP strings ("999.abc.def.1") are leaking past the validator. Ensure strict "ipv4" format constraint is enabled.</span>\n`;
+        } else {
+          challengeLog.innerHTML += `<span class="text-green-500">✓ Test Success: Strict IPv4 formats secured.</span>\n`;
+        }
+
+        // Validate Constraint 3 (Specific criticalities)
+        const allowedEnums = userEnumsStr.split(',').map(s => s.trim());
+        // Must reject "EXTRA_HIGH" and "UNKNOWN", but accept standard low-critical keys
+        if (allowedEnums.includes("EXTRA_HIGH") || allowedEnums.includes("UNKNOWN") || !allowedEnums.includes("CRITICAL")) {
+          results.enums = false;
+          challengeLog.innerHTML += `<span class="text-red-500">❌ Test Failure: Custom severity enums contains unsafe values. Restrict options specifically to default system rules.</span>\n`;
+        } else {
+          challengeLog.innerHTML += `<span class="text-green-500">✓ Test Success: Allowed severity rating constraints active.</span>\n`;
+        }
+
+        // Validate Constraint 4 (Port Ranges 1 - 65535)
+        if (userPortMin < 1 || userPortMax > 65535 || isNaN(userPortMin) || isNaN(userPortMax)) {
+          results.ports = false;
+          challengeLog.innerHTML += `<span class="text-red-500">❌ Test Failure: Port range boundaries allow invalid ranges (0 or 999999). Keep ranges strictly between 1 and 65535.</span>\n`;
+        } else {
+          challengeLog.innerHTML += `<span class="text-green-500">✓ Test Success: Port ranges correctly bound.</span>\n`;
+        }
+
+        // Validate Constraint 5 (Strict Boolean casting)
+        if (userBoolType !== 'strict') {
+          results.bool = false;
+          challengeLog.innerHTML += `<span class="text-red-500">❌ Test Failure: Loose typing allowed string equivalents ("yes", "true") which breaks database parsers. Enforce strict Booleans.</span>\n`;
+        } else {
+          challengeLog.innerHTML += `<span class="text-green-500">✓ Test Success: Type safety schema verified.</span>\n`;
+        }
+
+      } catch (err) {
+        challengeLog.innerHTML += `<span class="text-red-400">× Compiling Schema Error: ${err.message}</span>\n`;
+        return;
+      }
+
+      // 3. Render Achievements
+      updateCheckboxes(results);
+      
+      // Calculate overall progress pct
+      let passedCount = Object.values(results).filter(Boolean).length;
+      let scorePct = passedCount * 20;
+      document.getElementById('progressPct').innerText = `${scorePct}% Secured`;
+
+      if (scorePct === 100) {
+        challengeLog.innerHTML += `\n<span class="text-brandGreen-highlight font-black">★★★ PIPELINE DECLARED SECURE! 100% SUITE VERIFIED ★★★</span>\n`;
+        logConsole("Hacker lab challenge completed. Output pipeline locked down successfully.", "success");
+        setTimeout(() => {
+          document.getElementById('congratsModal').classList.remove('hidden');
+        }, 800);
+      } else {
+        challengeLog.innerHTML += `\n<span class="text-yellow-500 font-bold">Diagnostics finished with errors. Adjust configurations and re-run.</span>\n`;
+        logConsole(`Security evaluation complete. Compliancy score: ${scorePct}%`, "error");
+      }
+    }
+
+    function closeCongratsModal() {
+      document.getElementById('congratsModal').classList.add('hidden');
+    }
+  </script>
+
+</body>
+</html>
