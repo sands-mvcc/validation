@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Validation Lab Launchpad</title>
+  <!-- Google Fonts: Inter for academic & technological legibility -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind Configuration for Custom Forest Green & Premium Black palette -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Fira Code', 'monospace'],
+          },
+          colors: {
+            brand: {
+              light: '#f8fafc',
+              dark: '#030712',
+              green: '#10b981', // emerald-500
+              greenHover: '#059669', // emerald-600
+              greenGlow: 'rgba(16, 185, 129, 0.15)',
+              black: '#0f172a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Prevent raw transitions flash and implement custom scrolling styling */
+    * {
+      transition: background-color 0.3s ease, border-color 0.3s ease, text-decoration-color 0.3s ease;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(16, 185, 129, 0.2);
+      border-radius: 99px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(16, 185, 129, 0.4);
+    }
+    /* Sleek card hover transformations */
+    .lab-card {
+      transform: translateY(0);
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .lab-card:hover {
+      transform: translateY(-4px);
+    }
+    /* Notification micro-popup transition */
+    #copy-toast {
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-950 dark:bg-zinc-950 dark:text-zinc-50 min-h-screen flex flex-col justify-between">
+
+  <!-- ================= TOP NAVIGATION HEADER ================= -->
+  <header class="sticky top-0 z-50 w-full bg-white/90 dark:bg-zinc-900/95 border-b border-slate-200 dark:border-zinc-800 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Premium University / Curriculum Branding -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-lg bg-black dark:bg-emerald-500 flex items-center justify-center text-emerald-400 dark:text-black font-extrabold shadow-lg shadow-emerald-500/10 border border-emerald-500/20">
+          <svg class="w-5 h-5 text-emerald-500 dark:text-zinc-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-base font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+            AI & Cybersecurity Lab Workspace 
+            <span class="text-[10px] bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-mono px-1.5 py-0.5 rounded">v2.6</span>
+          </h1>
+          <p class="text-xs text-slate-500 dark:text-emerald-400 font-semibold tracking-wide">Instructor-Led Prompt Validation Pipeline</p>
+        </div>
+      </div>
+
+      <!-- Live Dynamic Performance Tracker -->
+      <div class="flex items-center space-x-4">
+        
+        <!-- Live Completion Badge -->
+        <div class="flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-emerald-50/80 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/60">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400" id="mastery-counter">0 of 9 Completed</span>
+        </div>
+
+        <!-- Custom Mode Toggle -->
+        <button id="theme-btn" class="p-2.5 rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-800/80 text-slate-500 dark:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-200" aria-label="Toggle visual mode">
+          <!-- Light Mode Icon as default -->
+          <svg id="theme-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Unified Curriculum Mastery Progress Bar -->
+    <div class="w-full h-1 bg-slate-100 dark:bg-zinc-800">
+      <div id="mastery-progress" class="h-1 bg-emerald-500 dark:bg-emerald-400 w-0 transition-all duration-500"></div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10 flex-grow">
+    
+    <!-- ================= ADAPTIVE HERO COMPONENT ================= -->
+    <section class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-8 rounded-2xl shadow-sm flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl"></div>
+      
+      <div class="space-y-4 max-w-3xl">
+        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400 text-xs font-semibold uppercase tracking-wider">
+          <span>Module: Generative AI Sandboxes</span>
+        </div>
+        <h2 class="text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white sm:text-4xl">
+          Constraining Large Language Models
+        </h2>
+        <p class="text-slate-600 dark:text-zinc-300 text-sm leading-relaxed font-medium">
+          Welcome to the sandbox workspace. These nine structured lab environments challenge you to programmatic prompt structures that prevent hallucination, enforce verification audits, and secure enterprise outcomes across academic and technological policies. 
+        </p>
+        <div class="flex flex-wrap gap-4 text-xs font-bold text-slate-500 dark:text-zinc-400">
+          <span class="flex items-center gap-1">
+            <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            9 Interactive Sandbox Labs
+          </span>
+          <span class="flex items-center gap-1">
+            <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            NIST & Campus Guidelines Mapped
+          </span>
+        </div>
+      </div>
+      
+      <!-- Back-to-Hub Navigation Action -->
+      <div class="flex-shrink-0 w-full md:w-auto">
+        <a href="index.html" class="w-full md:w-auto inline-flex items-center justify-center px-5 py-3 rounded-xl border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-bold text-xs transition-all">
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          Return to Launchpad Syllabus
+        </a>
+      </div>
+    </section>
+
+    <!-- ================= ADAPTIVE LIVE FILTERS PANEL ================= -->
+    <section class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-5 rounded-xl shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+      
+      <!-- Dynamic Search Box -->
+      <div class="relative w-full md:w-80">
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="w-4 h-4 text-slate-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </span>
+        <input type="text" id="lab-search" placeholder="Search lab objectives, focus areas..." class="w-full pl-9 pr-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-xl bg-slate-50 dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all placeholder:text-slate-400 dark:placeholder:text-zinc-600">
+      </div>
+
+      <!-- Quick Category Filters -->
+      <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-2 hidden sm:inline">Category Filter:</span>
+        <button onclick="filterCategory('All')" id="btn-cat-All" class="cat-btn px-3 py-1.5 text-xs font-bold rounded-lg bg-black text-white dark:bg-emerald-500 dark:text-black transition-all">All Labs</button>
+        <button onclick="filterCategory('College Policies')" id="btn-cat-College Policies" class="cat-btn px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all">College Policies</button>
+        <button onclick="filterCategory('Cybersecurity Standards')" id="btn-cat-Cybersecurity Standards" class="cat-btn px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all">Cybersecurity Standards</button>
+        <button onclick="filterCategory('Compliance Reports')" id="btn-cat-Compliance Reports" class="cat-btn px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all">Compliance Reports</button>
+      </div>
+    </section>
+
+    <!-- ================= THE 9 SANDBOX LAB CARDS GRID ================= -->
+    <section id="labs-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Generated Dynamically via Javascript below -->
+    </section>
+
+  </main>
+
+  <!-- ================= NOTIFICATION TOAST ================= -->
+  <div id="copy-toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 pointer-events-none flex items-center space-x-2.5 bg-zinc-950 text-white dark:bg-emerald-500 dark:text-zinc-950 px-5 py-3.5 rounded-xl shadow-2xl border border-emerald-500/20 font-medium text-sm">
+    <svg class="w-4 h-4 text-emerald-400 dark:text-zinc-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+    </svg>
+    <span id="toast-message">Template prompt copied successfully!</span>
+  </div>
+
+  <!-- ================= PREMIUM INSTITUTIONAL FOOTER ================= -->
+  <footer class="border-t border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 py-8 mt-16 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-slate-500 dark:text-zinc-400">
+      <div class="flex items-center space-x-2.5 font-bold text-slate-900 dark:text-zinc-100">
+        <span>AI Validating Technique Panel</span>
+        <span>•</span>
+        <span>Standard Operating Workshop Curriculum</span>
+      </div>
+      <div>
+        <span>Design adapted to Academic White, Green & Black standards</span>
+        <span class="mx-2">|</span>
+        <span>Instructor Sandbox Suite</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= JAVASCRIPT LOGIC / COMPONENT ARCHITECTURE ================= -->
+  <script>
+    // Rich, detailed structural dataset for the 9 hands-on activity files
+    const labsDataset = [
+      {
+        id: "01",
+        title: "Multi-Agent Policy Deliberation Matrix",
+        technique: "Technique 1: Use Personas or AI Skills",
+        file: "activity01.html",
+        category: "College Policies",
+        difficulty: "Advanced",
+        time: "40 Mins",
+        summary: "Assemble a virtual validation committee inside a model loop to systematically catch policy errors.",
+        objectives: [
+          "Establish Academic Dean, Cyber Director, and Legal Counsel personas",
+          "Instruct agents to review college policy drafts sequentially",
+          "Converge recommendations into an error-free, audited policy draft"
+        ],
+        icon: `<svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>`,
+        promptTemplate: "Act as an academic committee containing three profiles: [Academic Dean], [SOP Security Director], and [Legal Advisor]. Systematically review the attached student AI guidelines draft. Each agent must output independent critiques before modifying the master text."
+      },
+      {
+        id: "02",
+        title: "Strict Citation Anchoring & Backtracking",
+        file: "activity02.html",
+        technique: "Technique 2: Require Source Citation",
+        category: "Cybersecurity Standards",
+        difficulty: "Intermediate",
+        time: "30 Mins",
+        summary: "Force precise regulatory verification by requiring the model to map outputs to paragraph-level keys.",
+        objectives: [
+          "Anchor model assertions to a specific NIST SP 800-53 reference block",
+          "Incorporate rigorous [Section X, Paragraph Y] coordinate citations",
+          "Ensure complete factual tracking to prevent generalized assumptions"
+        ],
+        icon: `<svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.832.477 5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-5 1.253"></path></svg>`,
+        promptTemplate: "Synthesize the provided compliance handbook text. Every factual assertion you make must be suffixed with the exact page and paragraph index. If no exact citation anchor exists, do not include the statement."
+      },
+      {
+        id: "03",
+        title: "Neutralizing the Bias toward Completion",
+        file: "activity03.html",
+        technique: "Technique 3: Return \"I Don't Know\" Answers",
+        category: "College Policies",
+        difficulty: "Beginner",
+        time: "25 Mins",
+        summary: "Teach models to assertively state missing facts instead of formulating speculative answers.",
+        objectives: [
+          "Defuse standard LLM optimization to satisfy queries at all costs",
+          "Deploy boundary gates forcing an error output string upon missing variables",
+          "Test model resilience against deceptive academic scenario injects"
+        ],
+        icon: `<svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
+        promptTemplate: "Analyze the student registration scenario. If the handbook context does not specify a quantitative fee threshold or registration deadline, output strictly: '[STATUS: DATA_ABSENT_UNVERIFIED]'. Do not guess."
+      },
+      {
+        id: "04",
+        title: "Simulating Grounded Context Injection",
+        file: "activity04.html",
+        technique: "Technique 4: Use RAG",
+        category: "Cybersecurity Standards",
+        difficulty: "Intermediate",
+        time: "35 Mins",
+        summary: "Build localized context parameters that supersede a model's public training datasets.",
+        objectives: [
+          "Separate fuzzy open-web memory weights from strict document constraints",
+          "Inject custom local network security policies into system contexts",
+          "Formulate precise retrieval parsing prompts that index local standards"
+        ],
+        icon: `<svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>`,
+        promptTemplate: "Your context environment has been loaded with document block [LOCAL_SOP_04]. Evaluate student laboratory protocols strictly using this text. Disable all assumptions external to this block."
+      },
+      {
+        id: "05",
+        title: "Decomposing Logical Chains of Thought",
+        file: "activity05.html",
+        technique: "Technique 5: Use Smaller Steps",
+        category: "Compliance Reports",
+        difficulty: "Advanced",
+        time: "45 Mins",
+        summary: "Isolate structural analysis routines into linear calculations to limit compounding logic errors.",
+        objectives: [
+          "Deconstruct complex multi-tiered accreditation reports",
+          "Isolate quantitative enrollment statistics from narrative summaries",
+          "Build multi-stage pipelines that analyze metrics before generating advice"
+        ],
+        icon: `<svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>`,
+        promptTemplate: "Analyze the college's program portfolio in three explicit, non-overlapping cycles: 1. Extract enrollment vectors. 2. Verify math alignment. 3. Output strategic programmatic updates based on the completed calculations."
+      },
+      {
+        id: "06",
+        title: "Constructing Interactive Prompt Refinement Gates",
+        file: "activity06.html",
+        technique: "Technique 6: Meta Prompting / Prompt Builders",
+        category: "College Policies",
+        difficulty: "Beginner",
+        time: "20 Mins",
+        summary: "Implement interactive refinement buffers that intercept and polish ambiguous user prompts.",
+        objectives: [
+          "Construct an interactive meta-agent designed to refine vague prompts",
+          "Systematically prompt for curriculum, difficulty, and target criteria",
+          "Synthesize clean, optimized programmatic instructions to generate training scripts"
+        ],
+        icon: `<svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>`,
+        promptTemplate: "Do not write the syllabus yet. Ask me 4 questions sequentially to collect information regarding learning outcomes, certification alignment, focus area, and compliance standard, then assemble a optimized system prompt."
+      },
+      {
+        id: "07",
+        title: "N-Model Consensus Engineering Pipelines",
+        file: "activity07.html",
+        technique: "Technique 7: Cross-Check Multiple Sources",
+        category: "Compliance Reports",
+        difficulty: "Advanced",
+        time: "50 Mins",
+        summary: "Develop validation mechanisms that cross-reference draft materials across distinct foundational model engines.",
+        objectives: [
+          "Understand logical and metric drift between separate model training weights",
+          "Configure Claude/Gemini/GPT consensus scripts to identify factual divergence",
+          "Automate structural reviews that flag unverified terms in a compliance audit"
+        ],
+        icon: `<svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>`,
+        promptTemplate: "Compare this student support program summary generated by Model A against the original catalog. Audit and report any divergence, statistical overstatement, or logical drift in a structured table."
+      },
+      {
+        id: "08",
+        title: "Few-Shot Calibration and Corrective Tuning",
+        file: "activity08.html",
+        technique: "Technique 8: Use Inadequate Output to Train",
+        category: "Cybersecurity Standards",
+        difficulty: "Intermediate",
+        time: "30 Mins",
+        summary: "Deliver concrete boundary markers to guide model performance using bad and good output pairs.",
+        objectives: [
+          "Implement in-context learning constraints via few-shot training blocks",
+          "Delineate clear parameters separating weak drafts from accurate documents",
+          "Minimize style flaws and boilerplate AI output jargon"
+        ],
+        icon: `<svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>`,
+        promptTemplate: "Here is a standard cybersecurity incident report. Avoid outputting generic lists (Refer to Example [INADEQUATE_DRAFT]). Calibrate output to use the exact operational terminology specified in [EXCEPTIONAL_CALIBRATED_DRAFT]."
+      },
+      {
+        id: "09",
+        title: "Designing Compliance Verification Scorecards",
+        file: "activity09.html",
+        technique: "Technique 9: Keep Human-in-the-Loop",
+        category: "Compliance Reports",
+        difficulty: "Advanced",
+        time: "45 Mins",
+        summary: "Deploy strict evaluative scoring boundaries to force automated safety alerts and manual sign-offs.",
+        objectives: [
+          "Integrate quantitative multi-criteria metrics to judge output certainty",
+          "Enforce alert gates that block distribution if calculated score is under 85%",
+          "Configure standard checklists that guarantee systematic human inspection"
+        ],
+        icon: `<svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>`,
+        promptTemplate: "Score the generated syllabus guidelines on five dimensions out of 20 points: accuracy, regulatory alignment, absence of generic placeholders, clarity, and viability. If the total is below 85 points, alert user: 'REJECTED: PENDING REVISION'."
+      }
+    ];
+
+    // Page State management
+    const state = {
+      isDarkMode: false,
+      selectedCategory: "All",
+      searchTerm: "",
+      completedLabs: new Set()
+    };
+
+    // Load persisted state from localStorage to track progress
+    function loadSavedProgress() {
+      const saved = localStorage.getItem("ai_workshop_completed_labs");
+      if (saved) {
+        const list = JSON.parse(saved);
+        state.completedLabs = new Set(list);
+      }
+      
+      const themePref = localStorage.getItem("ai_workshop_dark_mode");
+      if (themePref === "true") {
+        state.isDarkMode = true;
+        document.documentElement.classList.add("dark");
+        updateThemeUI();
+      }
+    }
+
+    function saveProgress() {
+      localStorage.setItem("ai_workshop_completed_labs", JSON.stringify(Array.from(state.completedLabs)));
+      updateSyllabusMetrics();
+    }
+
+    // Toggle Complete States
+    window.toggleLabComplete = function(id, event) {
+      if (event) {
+        event.stopPropagation();
+      }
+      
+      if (state.completedLabs.has(id)) {
+        state.completedLabs.delete(id);
+      } else {
+        state.completedLabs.add(id);
+        triggerToast("Lab " + id + " marked as Completed!");
+      }
+      saveProgress();
+    };
+
+    // Update Overall Dynamic Mastery Progress
+    function updateSyllabusMetrics() {
+      const total = labsDataset.length;
+      const done = state.completedLabs.size;
+      const pct = Math.round((done / total) * 100);
+
+      document.getElementById("mastery-counter").innerText = `${done} of ${total} Completed`;
+      document.getElementById("mastery-progress").style.width = `${pct}%`;
+    }
+
+    // Interactive Toast Notification Framework (optimized for iFrames)
+    function triggerToast(message) {
+      const toast = document.getElementById("copy-toast");
+      const text = document.getElementById("toast-message");
+      text.innerText = message;
+      
+      toast.classList.remove("opacity-0", "translate-y-20", "pointer-events-none");
+      toast.classList.add("opacity-100", "translate-y-0");
+
+      setTimeout(() => {
+        toast.classList.add("opacity-0", "translate-y-20", "pointer-events-none");
+        toast.classList.remove("opacity-100", "translate-y-0");
+      }, 3000);
+    }
+
+    // Clipboard verification handler
+    window.copyPromptTemplate = function(id, event) {
+      if (event) {
+        event.stopPropagation();
+      }
+      const lab = labsDataset.find(l => l.id === id);
+      if (!lab) return;
+
+      // Compatibility fallback constraint as defined in system instructions
+      const tempTextArea = document.createElement("textarea");
+      tempTextArea.value = lab.promptTemplate;
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      try {
+        document.execCommand("copy");
+        triggerToast("Prompt template copied to clipboard!");
+      } catch (err) {
+        console.error("Copy failed", err);
+      }
+      document.body.removeChild(tempTextArea);
+    };
+
+    // Card launch wrapper
+    window.launchSandbox = function(url, id) {
+      // Mark as completed or interactively track clicking if needed
+      window.open(url, "_blank");
+    };
+
+    // Expand Prompt Panel dynamically
+    window.togglePromptPreview = function(id, event) {
+      if (event) {
+        event.stopPropagation();
+      }
+      const panel = document.getElementById("prompt-panel-" + id);
+      const icon = document.getElementById("arrow-icon-" + id);
+      
+      if (panel.classList.contains("hidden")) {
+        panel.classList.remove("hidden");
+        icon.classList.add("rotate-180");
+      } else {
+        panel.classList.add("hidden");
+        icon.classList.remove("rotate-180");
+      }
+    };
+
+    // Category Filter Trigger
+    window.filterCategory = function(category) {
+      state.selectedCategory = category;
+      
+      // Update UI button attributes
+      document.querySelectorAll(".cat-btn").forEach(btn => {
+        btn.className = "cat-btn px-3 py-1.5 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 dark:bg-zinc-800 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all";
+      });
+
+      const activeBtn = document.getElementById("btn-cat-" + category);
+      if (activeBtn) {
+        activeBtn.className = "cat-btn px-3 py-1.5 text-xs font-bold rounded-lg bg-black text-white dark:bg-emerald-500 dark:text-black transition-all";
+      }
+
+      renderLabsGrid();
+    };
+
+    // Search Trigger listener
+    document.getElementById("lab-search").addEventListener("input", (e) => {
+      state.searchTerm = e.target.value.toLowerCase();
+      renderLabsGrid();
+    });
+
+    // Theme Customizer Logic
+    const themeBtn = document.getElementById("theme-btn");
+    themeBtn.addEventListener("click", () => {
+      state.isDarkMode = !state.isDarkMode;
+      localStorage.setItem("ai_workshop_dark_mode", state.isDarkMode);
+      if (state.isDarkMode) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+      updateThemeUI();
+    });
+
+    function updateThemeUI() {
+      const themeBtn = document.getElementById("theme-btn");
+      if (state.isDarkMode) {
+        themeBtn.innerHTML = `
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+        `;
+      } else {
+        themeBtn.innerHTML = `
+          <svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+          </svg>
+        `;
+      }
+    }
+
+    // Grid Renderer mapping standard objectives and styles
+    function renderLabsGrid() {
+      const grid = document.getElementById("labs-grid");
+      grid.innerHTML = "";
+
+      const filtered = labsDataset.filter(lab => {
+        const matchesCategory = state.selectedCategory === "All" || lab.category === state.selectedCategory;
+        const matchesSearch = lab.title.toLowerCase().includes(state.searchTerm) || 
+                              lab.technique.toLowerCase().includes(state.searchTerm) ||
+                              lab.summary.toLowerCase().includes(state.searchTerm) ||
+                              lab.category.toLowerCase().includes(state.searchTerm);
+        return matchesCategory && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-16 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl">
+            <svg class="w-12 h-12 mx-auto text-slate-300 dark:text-zinc-700 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="font-bold text-slate-800 dark:text-zinc-200 text-base">No Matching Labs Located</h3>
+            <p class="text-xs text-slate-400 dark:text-zinc-500 mt-1">Refine your search parameters or check the category tags.</p>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(lab => {
+        const isCompleted = state.completedLabs.has(lab.id);
+        const card = document.createElement("div");
+        card.className = `lab-card bg-white dark:bg-zinc-900 border ${
+          isCompleted 
+            ? "border-emerald-500/50 dark:border-emerald-500/40 shadow-emerald-500/5" 
+            : "border-slate-200 dark:border-zinc-800 shadow-sm"
+        } rounded-2xl p-6 flex flex-col justify-between hover:shadow-md transition-all relative group`;
+
+        // Checkbox status UI element
+        const checkboxState = isCompleted ? "checked" : "";
+
+        card.innerHTML = `
+          <div class="space-y-4">
+            
+            <!-- Metadata and Mastery Actions -->
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <span class="text-[10px] font-mono font-bold bg-slate-100 dark:bg-zinc-950 text-slate-600 dark:text-zinc-400 px-2 py-0.5 rounded border border-slate-200 dark:border-zinc-800/80">LAB ${lab.id}</span>
+                <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/20 px-2 py-0.5 rounded-full uppercase tracking-wider">${lab.difficulty}</span>
+              </div>
+              
+              <!-- Completion Status Checkbox Toggle -->
+              <label class="inline-flex items-center cursor-pointer select-none" title="Mark Lab as Complete">
+                <input type="checkbox" ${checkboxState} onclick="toggleLabComplete('${lab.id}', event)" class="w-4.5 h-4.5 rounded border-slate-300 text-emerald-600 dark:border-zinc-800 focus:ring-emerald-500 dark:bg-zinc-950 accent-emerald-500">
+              </label>
+            </div>
+
+            <!-- Header Title and Concept Icon block -->
+            <div class="flex items-start justify-between gap-3 pt-2">
+              <div class="space-y-1">
+                <h3 class="font-extrabold text-slate-900 dark:text-white text-base tracking-tight leading-snug group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">${lab.title}</h3>
+                <span class="text-[11px] font-semibold text-slate-400 block">${lab.technique}</span>
+              </div>
+              <div class="w-10 h-10 rounded-lg bg-slate-50 dark:bg-zinc-950 flex items-center justify-center border border-slate-100 dark:border-zinc-800/80 flex-shrink-0">
+                ${lab.icon}
+              </div>
+            </div>
+
+            <p class="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed font-medium">
+              ${lab.summary}
+            </p>
+
+            <!-- Learning Objectives Sublist -->
+            <div class="space-y-2 pt-2">
+              <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Learning Objectives</h4>
+              <ul class="space-y-1.5 text-xs">
+                ${lab.objectives.map(obj => `
+                  <li class="flex items-start gap-2 text-slate-600 dark:text-zinc-400 text-[11px] leading-snug">
+                    <span class="text-emerald-500 mt-1 flex-shrink-0">•</span>
+                    <span>${obj}</span>
+                  </li>
+                `).join('')}
+              </ul>
+            </div>
+
+            <!-- Interactive Base Prompt Expansion Trigger -->
+            <div class="pt-3">
+              <button onclick="togglePromptPreview('${lab.id}', event)" class="w-full py-2 px-3 rounded-lg bg-slate-50 dark:bg-zinc-950 text-slate-500 hover:text-slate-800 dark:text-zinc-400 dark:hover:text-zinc-200 text-xs font-semibold border border-slate-200/60 dark:border-zinc-800/60 flex items-center justify-between">
+                <span>Base Prompt Template</span>
+                <svg id="arrow-icon-${lab.id}" class="w-3 h-3 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+              
+              <!-- Collapsible Prompt Box -->
+              <div id="prompt-panel-${lab.id}" class="hidden mt-2 p-3 bg-zinc-950 dark:bg-zinc-950 border border-zinc-800 rounded-lg text-[11px] font-mono text-emerald-400 relative space-y-2 max-h-40 overflow-y-auto custom-scrollbar">
+                <p class="leading-relaxed">"${lab.promptTemplate}"</p>
+                <div class="flex justify-end pt-1">
+                  <button onclick="copyPromptTemplate('${lab.id}', event)" class="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-[10px] font-bold text-zinc-300 hover:text-white flex items-center gap-1.5 border border-zinc-700">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-5 10h5m-5 4h5m-9-4h.01M9 16h.01"></path>
+                    </svg>
+                    Copy Prompt
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Sandbox Execution Footer -->
+          <div class="pt-5 mt-4 border-t border-slate-100 dark:border-zinc-800/80 flex items-center justify-between gap-4 text-xs font-bold text-slate-500">
+            <span class="flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              ${lab.time}
+            </span>
+            <button onclick="launchSandbox('${lab.file}', '${lab.id}')" class="inline-flex items-center justify-center px-4 py-2 rounded-xl bg-black hover:bg-emerald-600 text-white dark:bg-zinc-800 dark:hover:bg-emerald-500 dark:text-zinc-100 dark:hover:text-black hover:shadow-md transition-all">
+              <span>Launch Sandbox</span>
+              <svg class="w-3.5 h-3.5 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+              </svg>
+            </button>
+          </div>
+        `;
+        
+        grid.appendChild(card);
+      });
+    }
+
+    // App Initialization lifecycle
+    window.onload = function() {
+      loadSavedProgress();
+      renderLabsGrid();
+      updateSyllabusMetrics();
+    };
+  </script>
+</body>
+</html>
