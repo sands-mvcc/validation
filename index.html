@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Validating Technique - Workshop Launchpad</title>
+  <!-- Google Fonts: Inter for premium legible typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind Configuration for custom animations and dark mode -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'bounce-slow': 'bounce 2s infinite',
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Core Styles for 3D Cards, Custom Scrollbars, and Theme Transitions -->
+  <style>
+    /* Prevent raw transition flash and enable smooth theme transitions */
+    * {
+      transition: background-color 0.4s ease, border-color 0.4s ease, text-decoration-color 0.4s ease;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* 3D Flip Card Styles */
+    .card-container {
+      perspective: 1500px;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 570px; /* Slightly adjusted to accommodate double button footer comfortably */
+      text-align: left;
+      transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+
+    /* Activated flipped state */
+    .card-inner.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 1.25rem;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    /* Custom thin scrollbar for card contents and key terms */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(16, 185, 129, 0.2);
+      border-radius: 99px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(16, 185, 129, 0.4);
+    }
+
+    /* Glassmorphism accent utility */
+    .glass-nav {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-300">
+
+  <!-- ================= TOP NAVIGATION HEADER ================= -->
+  <header class="sticky top-0 z-50 w-full bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 glass-nav transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Logo / Workshop Identifier -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-slate-900 dark:bg-slate-100 flex items-center justify-center text-emerald-500 dark:text-emerald-600 font-black shadow-md shadow-emerald-500/10">
+          AI
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-slate-905 dark:text-white flex items-center gap-1.5">
+            <span>Validating Technique</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          </h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Instructor-Led Interactive Launchpad</p>
+        </div>
+      </div>
+
+      <!-- Theme & Progress Actions -->
+      <div class="flex items-center space-x-4">
+        
+        <!-- Interactive Master Completion Badge -->
+        <div class="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900/60">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-xs font-semibold text-emerald-700 dark:text-emerald-300" id="progress-badge">0/9 Mastered</span>
+        </div>
+
+        <!-- Theme Toggle Button -->
+        <button id="theme-toggle" class="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-500 dark:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all duration-200" aria-label="Toggle dark mode">
+          <!-- Default Sun Icon (for Light Mode, switches dynamically) -->
+          <svg id="theme-sun-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Top-level Progress Indicator bar -->
+    <div class="w-full h-1 bg-slate-100 dark:bg-slate-800">
+      <div id="mastery-progress-bar" class="h-1 bg-emerald-500 dark:bg-emerald-400 w-0 transition-all duration-500"></div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-16">
+
+    <!-- ================= HERO PRESENTATION SECTION ================= -->
+    <section class="text-center max-w-4xl mx-auto space-y-6 pt-6">
+      <div class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400 text-xs font-semibold uppercase tracking-wider">
+        <span>Interactive Workshop Introduction & Syllabus</span>
+      </div>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+        AI Validating <span class="bg-gradient-to-r from-emerald-600 via-slate-900 to-emerald-500 dark:from-emerald-400 dark:to-emerald-200 bg-clip-text text-transparent">Technique</span>
+      </h1>
+      <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto font-medium leading-relaxed">
+        Learn nine practical techniques to constrain Large Language Models, reduce hallucination, eliminate inaccuracy, and secure reliable enterprise outputs.
+      </p>
+    </section>
+
+    <!-- ================= RATIONALE & OBJECTIVES PANEL ================= -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      
+      <!-- Left Card: Rationale -->
+      <div class="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+        <div class="space-y-4">
+          <div class="flex items-center space-x-3 text-emerald-600 dark:text-emerald-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h2 class="text-xl font-bold tracking-tight text-slate-950 dark:text-white">Rationale for the Workshop</h2>
+          </div>
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+            As Generative AI becomes embedded into professional workflows, its major liability remains <strong>hallucination</strong>—the plausible-sounding fabrication of data. Relying on unchecked AI draft material introduces profound cybersecurity vulnerabilities, academic policy errors, compliance exposure, and operational risks.
+          </p>
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
+            This workshop equips leaders, educators, and technicians with programmatic prompts and design workflows that ground AI in verified documents, cross-check parameters using multiple model sources, and preserve high standards of accuracy through systematic feedback mechanisms.
+          </p>
+        </div>
+        <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800/60 flex items-center space-x-3 text-xs font-semibold text-slate-500">
+          <span>Focus Areas: College Policies, Cybersecurity Standards, Compliance Reports</span>
+        </div>
+      </div>
+
+      <!-- Right Card: Learning Objectives -->
+      <div class="bg-white dark:bg-slate-900 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+        <div class="space-y-4">
+          <div class="flex items-center space-x-3 text-emerald-600 dark:text-emerald-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h2 class="text-xl font-bold tracking-tight text-slate-950 dark:text-white">Learning Objectives</h2>
+          </div>
+          <p class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">Interactive Syllabus Goals (Check off as you read):</p>
+          
+          <ul class="space-y-3">
+            <li class="flex items-start space-x-3 text-sm">
+              <input type="checkbox" class="mt-1 h-4.5 w-4.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 dark:border-slate-800 dark:bg-slate-950" id="obj-1">
+              <label for="obj-1" class="text-slate-600 dark:text-slate-300 select-none cursor-pointer">
+                Understand the cause of Large Language Model hallucinations and how to prompt for factual anchoring.
+              </label>
+            </li>
+            <li class="flex items-start space-x-3 text-sm">
+              <input type="checkbox" class="mt-1 h-4.5 w-4.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 dark:border-slate-800 dark:bg-slate-950" id="obj-2">
+              <label for="obj-2" class="text-slate-600 dark:text-slate-300 select-none cursor-pointer">
+                Implement multi-agent validation loops using secondary reviewer personas and domain auditors.
+              </label>
+            </li>
+            <li class="flex items-start space-x-3 text-sm">
+              <input type="checkbox" class="mt-1 h-4.5 w-4.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 dark:border-slate-800 dark:bg-slate-950" id="obj-3">
+              <label for="obj-3" class="text-slate-600 dark:text-slate-300 select-none cursor-pointer">
+                Apply Retrieval-Augmented Generation (RAG) concepts and enforce direct source citations.
+              </label>
+            </li>
+            <li class="flex items-start space-x-3 text-sm">
+              <input type="checkbox" class="mt-1 h-4.5 w-4.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 dark:border-slate-800 dark:bg-slate-950" id="obj-4">
+              <label for="obj-4" class="text-slate-600 dark:text-slate-300 select-none cursor-pointer">
+                Build structured interactive "Prompt Builders" to eliminate ambiguous human requests.
+              </label>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= KEY TERMS ACCORDION & GLOSSARY ================= -->
+    <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 shadow-sm space-y-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="space-y-1">
+          <h2 class="text-xl font-bold text-slate-950 dark:text-white">Workshop Key Terms</h2>
+          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Click on any vocabulary term to instantly reveal detailed definitions and compliance contexts.</p>
+        </div>
+        
+        <!-- Interactive Search / Filter Panel -->
+        <div class="relative w-full md:w-80">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+          <input type="text" id="terms-search" placeholder="Search key terms..." class="w-full pl-9 pr-4 py-2 border border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50 dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+        </div>
+      </div>
+
+      <!-- Live-Filtering Key Terms Layout -->
+      <div id="key-terms-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Javascript dynamically inserts term cards here -->
+      </div>
+    </section>
+
+    <!-- ================= LESSON FLIP-CARDS GRID HEADER ================= -->
+    <section class="space-y-4">
+      <div class="text-center max-w-2xl mx-auto space-y-2">
+        <h2 class="text-3xl font-bold tracking-tight text-slate-950 dark:text-white">Nine Core Validation Strategies</h2>
+        <p class="text-slate-600 dark:text-slate-400 text-sm">
+          Select and flip each strategy card below to study why the technique works, explore detailed examples, and navigate through real-world scenarios.
+        </p>
+      </div>
+
+      <!-- 3x3 Interactive Grid of 9 Flip-Cards -->
+      <div id="techniques-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Javascript dynamically renders 9 rich flip cards here -->
+      </div>
+    </section>
+
+    <!-- ================= CONGRATULATORY COMPLETION BANNER (HIDDEN BY DEFAULT) ================= -->
+    <div id="mastery-banner" class="hidden transition-all duration-500 scale-95 opacity-0 bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-8 rounded-2xl shadow-lg border border-emerald-400 text-center space-y-4">
+      <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto text-3xl animate-bounce">
+        🏆
+      </div>
+      <h3 class="text-2xl font-bold">Excellent Progress! You've Explored All 9 Techniques!</h3>
+      <p class="text-sm text-emerald-50 max-w-2xl mx-auto font-medium">
+        You are now fully prepared to analyze, critique, and test these prompt designs in real-world environments. Launch the sandbox lab activities below to apply your expertise.
+      </p>
+    </div>
+
+    <!-- ================= ONE LARGE CARD: LAUNCH WORKSPACE ACTIVITY ================= -->
+    <section class="relative group">
+      <!-- Glow decoration effect -->
+      <div class="absolute -inset-1.5 bg-gradient-to-r from-emerald-500 via-slate-900 to-emerald-600 rounded-3xl blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
+      
+      <div class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 sm:p-10 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-8">
+        <div class="space-y-4 text-center md:text-left max-w-2xl">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-900/60 text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase">
+            <span>Next Stage: Hands-on Lab</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-950 dark:text-white tracking-tight">Launch Workshop Activities</h2>
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed font-medium">
+            Ready to transition from theory to practice? Launch the sandbox interactive assessment page <code class="bg-slate-100 dark:bg-slate-950 px-2 py-1 rounded font-mono text-xs text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-800">activites.html</code>. In the lab, you will audit false AI drafts, construct robust compliance prompt templates, and construct real persona auditing networks.
+          </p>
+        </div>
+
+        <div class="w-full md:w-auto flex-shrink-0">
+          <a href="activites.html" class="w-full md:w-auto inline-flex items-center justify-center px-8 py-4 rounded-xl bg-slate-950 hover:bg-slate-900 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-bold text-base shadow-lg shadow-emerald-600/25 transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150">
+            <span>Launch Validation Lab</span>
+            <svg class="w-5 h-5 ml-2.5 animate-pulse-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= PORTAL GRAPHIC DISPLAY MODAL (LIGHTBOX) ================= -->
+  <div id="graphic-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-slate-950/85 backdrop-blur-md opacity-0 transition-all duration-300 pointer-events-none" onclick="closeGraphicModal()">
+    <div class="relative max-w-4xl w-full mx-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 transform scale-95 transition-all duration-300" onclick="event.stopPropagation()">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center space-x-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <h3 id="modal-title" class="text-sm font-bold text-slate-900 dark:text-white uppercase font-mono tracking-wide">Technique Architecture</h3>
+        </div>
+        <div class="flex items-center space-x-2">
+          <!-- External Direct Tab Link -->
+          <a id="modal-external-link" href="#" target="_blank" class="p-2 text-slate-500 hover:text-emerald-600 dark:text-slate-400 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-850 rounded-lg transition-all text-xs font-semibold flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+            </svg>
+            <span>New Tab</span>
+          </a>
+          <!-- Close Button -->
+          <button onclick="closeGraphicModal()" class="p-2 text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Image Viewer Wrapper -->
+      <div class="relative w-full aspect-video max-h-[60vh] rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-950 flex items-center justify-center border border-slate-200/50 dark:border-slate-850">
+        <!-- Interactive Spinner Indicator -->
+        <div id="modal-spinner" class="absolute inset-0 flex items-center justify-center bg-slate-50 dark:bg-slate-950 z-10 transition-opacity duration-300">
+          <div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+        
+        <!-- Live Graphic Source -->
+        <img id="modal-img" src="" alt="Validation Technique Strategy Graphic" class="max-w-full max-h-full object-contain relative z-0 opacity-0 transition-opacity duration-300" onerror="handleImageError()" onload="handleImageLoaded()">
+
+        <!-- Seamless Image Error Panel -->
+        <div id="modal-error" class="hidden absolute inset-0 flex flex-col items-center justify-center p-6 text-center space-y-4 bg-slate-50 dark:bg-slate-950 z-20">
+          <div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-950/40 flex items-center justify-center text-rose-600 dark:text-rose-400">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-900 dark:text-white text-sm">Graphic Resource Offline</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mt-1">
+              The file <code id="missing-filename" class="bg-slate-100 dark:bg-slate-900 px-1 py-0.5 rounded font-mono text-emerald-600 dark:text-emerald-400">graphicXX.png</code> was not found in this environment path.
+            </p>
+          </div>
+          <a id="error-fallback-link" href="#" target="_blank" class="px-4 py-2 bg-slate-900 hover:bg-emerald-600 hover:text-white text-white dark:bg-slate-800 dark:hover:bg-slate-700 rounded-lg text-xs font-bold transition-all inline-flex items-center gap-1.5">
+            <span>Direct File Test Link</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Modal Footer Description -->
+      <div class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+        <p id="modal-desc" class="text-center sm:text-left leading-relaxed max-w-xl font-medium"></p>
+        <button onclick="closeGraphicModal()" class="w-full sm:w-auto px-5 py-2.5 bg-slate-950 hover:bg-slate-900 text-white dark:bg-white dark:hover:bg-slate-100 dark:text-slate-950 font-bold rounded-xl shadow-md transition-all text-center">
+          Dismiss View
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================= IMMERSIVE FOOTER ================= -->
+  <footer class="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 py-10 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6 text-sm">
+      <div class="flex items-center space-x-3 text-slate-500 dark:text-slate-400">
+        <span class="font-bold text-slate-900 dark:text-white">AI Validation Workshop Panel</span>
+        <span>•</span>
+        <span>Standard Operating Curriculum</span>
+      </div>
+      <div class="flex space-x-4 text-xs font-semibold text-slate-500 dark:text-slate-400">
+        <span>Theme Adjusted to Academic Standards</span>
+        <span>|</span>
+        <span>Syllabus: Data Verification & Auditing</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================= CORE COMPONENT JAVASCRIPT LOGIC ================= -->
+  <script>
+    // Master data arrays matching exactly your DOCX and styling guidelines
+    const keyTerms = [
+      {
+        term: "Hallucination",
+        definition: "A phenomenon where an AI model generates content that is highly plausible-sounding but factually incorrect or completely unsupported by its training data or inputs."
+      },
+      {
+        term: "RAG (Retrieval-Augmented Generation)",
+        definition: "A technique that retrieves relevant text context from verified external databases or documents, inserting that context into the prompt so the AI acts as a synthesizer rather than a general guesser."
+      },
+      {
+        term: "Meta-Prompting",
+        definition: "The programmatic practice of using a Large Language Model to engineer, structure, write, or calibrate high-quality prompt templates on behalf of the user."
+      },
+      {
+        term: "Prompt Builder",
+        definition: "An interactive, controlled tool (often designed using AI) that guides a user to supply required factual contexts before drafting, eliminating vague requests."
+      },
+      {
+        term: "Human-in-the-Loop (HITL)",
+        definition: "A policy standard requiring human inspection and critical review of AI-generated content before it is dispatched, shared, or signed off."
+      },
+      {
+        term: "Persona Verification",
+        definition: "The architecture of instructing a secondary AI profile (e.g., 'Policy Verifier', 'Data Auditor') to critically cross-examine and inspect the first model draft output."
+      }
+    ];
+
+    const techniques = [
+      {
+        id: 1,
+        number: "Technique 1",
+        title: "Use Personas or AI Skills",
+        icon: `<svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>`,
+        description: "Instruct separate AI profiles (like auditor, analyst, or reviewer personas) to evaluate primary drafts and check logic.",
+        whyWorks: "AI personas adopt narrow specialized mindsets, focusing entirely on a single criterion (such as strict compliance, data calculations, or technical standards) to audit drafts rather than blindly continuing a narrative.",
+        examples: [
+          {
+            title: "Fact-checker persona for a policy answer",
+            scenario: "A drafting AI writes, “The late withdrawal deadline is October 15.” A second AI persona named “Policy Verifier” checks the student handbook and flags it as incorrect because the actual date is October 1."
+          },
+          {
+            title: "Cybersecurity analyst persona for technical accuracy",
+            scenario: "One AI creates a Security+ study explanation. A “Security Analyst” persona reviews it and catches that the draft confused symmetric and asymmetric encryption."
+          },
+          {
+            title: "Compliance reviewer persona for high-stakes content",
+            scenario: "A chatbot drafts advice about CMMC controls. A “Compliance Reviewer” persona checks whether the output is framed as guidance rather than legal certification and removes overstatements."
+          },
+          {
+            title: "Data auditor persona for numbers and tables",
+            scenario: "An AI generates a table showing enrollment totals. A “Data Auditor” persona verifies that the totals add up and that percentages match the source data."
+          },
+          {
+            title: "Subject-matter expert persona for domain logic",
+            scenario: "A writing AI explains an automotive feature or medical concept. A “SME Reviewer” persona checks whether the explanation makes domain sense and flags anything that sounds plausible but is technically wrong."
+          }
+        ]
+      },
+      {
+        id: 2,
+        number: "Technique 2",
+        title: "Require Source Citation",
+        icon: `<svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.832.477 5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-5 1.253"></path></svg>`,
+        description: "Anchor outputs directly to source files. Require the model to justify every factual statement with a cited reference.",
+        whyWorks: "By forcing the model to tie its answers to explicit, retrievable references, you anchor its generation in factual documents, preventing it from generalizing or fabricating plausible-sounding details.",
+        examples: [
+          {
+            title: "College policy chatbot validation",
+            scenario: "A student asks, “What is the withdrawal deadline?” The prompt requires: “Answer only if you can cite the current college catalog or registrar page; otherwise say you cannot verify it.” The model then responds with the deadline and names the exact source, or it refuses to guess if the source is missing."
+          },
+          {
+            title: "Cybersecurity training assistant validation",
+            scenario: "An instructor asks, “What does CMMC require at Level 2?” The model is told to cite the official framework, a government page, or approved course material for every claim. If it cannot connect a statement to a reference, it must label that statement as unverified or omit it."
+          },
+          {
+            title: "Research summary generator constraints",
+            scenario: "A faculty member asks for a summary of AI hallucination risks in education. The model must produce each key point with a supporting reference, such as “hallucinations can occur when the model generates false information” followed by the source it used. This prevents the system from presenting opinions or guesses as facts."
+          }
+        ]
+      },
+      {
+        id: 3,
+        number: "Technique 3",
+        title: "Return \"I Don't Know\" Answers",
+        icon: `<svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`,
+        description: "Explicitly direct the model to confess ignorance rather than forcing a response when source data is missing.",
+        whyWorks: "Standard AI models are optimized to satisfy queries. Explicitly permitting uncertainty neutralizes this bias and limits hallucinations of missing dates or requirements.",
+        examples: [
+          {
+            title: "Policy question with missing handbook references",
+            scenario: "A student asks, “What is the exact late-registration deadline?” The prompt says: “If you cannot verify the deadline from the current college handbook, say ‘I don’t know based on the available evidence.’” This prevents the model from inventing a date."
+          },
+          {
+            title: "Technical question with uncertain laboratory facts",
+            scenario: "An instructor asks, “Which version of the software was used in last year’s lab?” The prompt says: “Only answer if the version is clearly stated in the lab documentation; otherwise say you don’t know.” That stops the model from guessing a version number."
+          },
+          {
+            title: "Research summary with incomplete factual evidence",
+            scenario: "A user asks, “Did this AI training method reduce hallucinations by 50%?” The prompt says: “If the sources do not provide a clear measured result, respond that you don’t know and explain that the evidence is insufficient.” That keeps the model from overstating the result."
+          }
+        ]
+      },
+      {
+        id: 4,
+        number: "Technique 4",
+        title: "Use RAG",
+        icon: `<svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>`,
+        description: "Integrate Retrieval-Augmented Generation to synthesize answers from approved documents instead of general datasets.",
+        whyWorks: "RAG shifts the AI's role from a generator pulling from its broad, fuzzy memory to a search-and-synthesis assistant drawing only from a verified, curated knowledge base.",
+        examples: [
+          {
+            title: "HR policy assistant grounding",
+            scenario: "An employee asks, “How many vacation days do I get?” The AI retrieves the current HR policy from the approved handbook or policy portal and answers using that exact text, rather than relying on a generic guess."
+          },
+          {
+            title: "Customer support knowledge-base indexing",
+            scenario: "A customer asks, “How do I reset my device?” The AI pulls the answer from the product manual, FAQ, and support-ticket knowledge base, then gives a step-by-step response based on those sources."
+          },
+          {
+            title: "Compliance or legal Q&A database controls",
+            scenario: "A manager asks, “What does the contract say about termination notice?” The AI retrieves the relevant clause from the approved contract library or compliance database and summarizes only that clause, reducing the chance of fabricated legal details."
+          }
+        ]
+      },
+      {
+        id: 5,
+        number: "Technique 5",
+        title: "Use Smaller Steps",
+        icon: `<svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>`,
+        description: "Break complex analysis into multi-tiered, verifiable reasoning sub-steps to bypass logical errors.",
+        whyWorks: "Generating large, complex structures all at once compounds errors. Breaking the task into steps bounds the problem at each stage, making verification simple and preventing runaway logic errors.",
+        examples: [
+          {
+            title: "Compare two programs and recommend one step-by-step",
+            scenario: "For “Compare two programs and recommend one,” the AI first lists admission requirements, then course length, then cost, then produces a final recommendation only after those pieces are checked."
+          },
+          {
+            title: "Multi-step server installation audit",
+            scenario: "Instead of generating a massive multi-step deployment script at once, the system is directed to verify step 1 (dependency installation), review output for errors, proceed to step 2 (service configurations), and evaluate again."
+          },
+          {
+            title: "Mathematical and reasoning chains of thought",
+            scenario: "The AI is prompted to write down its formulas and intermediate calculations in individual blocks first. An automated evaluation script or reviewer reviews those variables before the AI constructs the final narrative report."
+          }
+        ]
+      },
+      {
+        id: 6,
+        number: "Technique 6",
+        title: "Meta Prompting / Prompt Builders",
+        icon: `<svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>`,
+        description: "Create interactive Prompt Builders that ask users structured questions first to ensure high-quality prompt synthesis.",
+        whyWorks: "Prompt builders improve consistency because they turn vague requests into structured inputs. Instead of asking the AI to fill in missing context, they require the user to provide the facts the model should rely on. That makes the final prompt more precise and reduces the chance of hallucinated details.",
+        examples: [
+          {
+            title: "Faculty email prompt builder template",
+            scenario: "A professor wants help rewriting an email. The prompt builder asks: Who is the audience? What is the purpose? What dates, deadlines, or policies must be included? What tone? This generates: “Write a concise email to first-years. Include the deadline of June 28, mention that no further extensions will be granted, and keep the tone supportive.”"
+          },
+          {
+            title: "Cybersecurity lesson plan prompt builder",
+            scenario: "An instructor wants a Security+ lesson. The builder asks: Topic, level, objectives, key terms, examples. Resulting prompt: “Create a 10-minute lesson for beginners on multifactor authentication. Include definitions, benefits, one real-world example, and three questions. Avoid cryptography terms.”"
+          },
+          {
+            title: "Policy summary prompt builder constraints",
+            scenario: "A manager needs a summary of a handbook section. The builder asks: Which section, target audience, format, direct quotes or paraphrase. Result: “Summarize Section 4.2 for supervisors in 5 bullets. Preserve all dates and rules exactly. Do not add information not present in the source.”"
+          }
+        ]
+      },
+      {
+        id: 7,
+        number: "Technique 7",
+        title: "Cross-Check Multiple Sources",
+        icon: `<svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>`,
+        description: "Establish automated evaluation pipelines that query and double-check outputs against separate databases/engines.",
+        whyWorks: "Using different engines (like retrieval models, logic checkers, and synthesis models) creates a series of independent checks and balances, greatly filtering out isolated hallucinations and inaccurate summaries.",
+        examples: [
+          {
+            title: "College policy answers with three-pass pipeline",
+            scenario: "First pass (ChatGPT): drafts financial aid details. Second pass (Perplexity): retrieves the live web page and current catalog. Third pass (Gemini): rewrites the answer strictly using verified elements, stripping unverified details."
+          },
+          {
+            title: "Cybersecurity lesson validation pipelines",
+            scenario: "First pass (Perplexity): drafts a cybersecurity overview. Second pass (Gemini): checks text definitions against official course syllabi and certification requirements. Third pass (Claude): revises text to conform only to standard terminology."
+          },
+          {
+            title: "Data summary calculation checks",
+            scenario: "First pass (ChatGPT): drafts a text narrative of enrollment figures. Second pass (Perplexity): calculates values via spreadsheet. Third pass (Gemini): synthesizes text using only verified spreadsheet outputs."
+          }
+        ]
+      },
+      {
+        id: 8,
+        number: "Technique 8",
+        title: "Use Inadequate Output to Train",
+        icon: `<svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>`,
+        description: "Train and anchor model precision by supplying direct corrective criteria on prior inaccurate answers.",
+        whyWorks: "Feedback teaches the model what counts as a good answer in that context: accurate, complete, appropriately detailed, and properly scoped. The more specific the feedback, the less likely the model is to repeat the same kind of mistake.",
+        examples: [
+          {
+            title: "Faculty writing assistant calibration",
+            scenario: "A professor asks the AI to rewrite an email. The first draft is too formal and adds a deadline that was never provided. The user gives feedback like: “Keep the tone warmer, and do not invent dates or policies.” The next version is better because the model learns the preferred tone."
+          },
+          {
+            title: "Cybersecurity lesson generator adaptation",
+            scenario: "An instructor asks for a Security+ explanation of phishing. The first answer is technically correct but too advanced for beginners. The user responds: “Simplify the vocabulary, add one everyday example, and avoid jargon like ‘credential harvesting’ unless you define it.” The model then produces accessible content."
+          },
+          {
+            title: "Policy summary tool corrective training",
+            scenario: "A staff member asks the AI to summarize a handbook section. The first summary omits an important eligibility rule and overstates who qualifies. The user gives corrective feedback: “Include the eligibility requirement exactly as written, and do not generalize the rule.” The output immediately corrects itself."
+          }
+        ]
+      },
+      {
+        id: 9,
+        number: "Technique 9",
+        title: "Keep Human-in-the-Loop",
+        icon: `<svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>`,
+        description: "Enforce human auditing sign-off pipelines on all high-stakes outputs before distribution.",
+        whyWorks: "Human review is the safest control when the cost of error is high. It catches mistakes that automated checks may miss, especially when the output affects compliance, finances, safety, or instruction.",
+        examples: [
+          {
+            title: "Compliance report human review and verification",
+            scenario: "An AI drafts a compliance summary for a college program, but a human reviewer checks every statement before it is shared. The reviewer verifies dates, policy references, and terminology so the AI does not accidentally overstate compliance or invent a requirement."
+          },
+          {
+            title: "Student-facing policy email safety checkpoints",
+            scenario: "An AI writes an email about financial aid or registration deadlines, then a staff member reviews it before sending. The human confirms that the deadline, office name, and instructions are correct, which prevents a small hallucination from becoming a campus-wide problem."
+          },
+          {
+            title: "Technical training manual quality controls",
+            scenario: "An AI generates a lesson on cybersecurity or AI safety, and a subject-matter expert reviews it before publication. The expert checks definitions, examples, and edge cases so inaccurate technical details do not get taught to students or faculty."
+          }
+        ]
+      }
+    ];
+
+    // Page state tracker
+    const state = {
+      isDarkMode: false,
+      exploredCards: new Set(),
+      activeExamples: {}, // techniqueId -> exampleIndex (integer)
+      searchTerm: ""
+    };
+
+    // Initialize state mapping
+    techniques.forEach(t => {
+      state.activeExamples[t.id] = 0;
+    });
+
+    // Handle Theme Switches (Light Mode default)
+    const themeToggleButton = document.getElementById('theme-toggle');
+    const themeSunIcon = document.getElementById('theme-sun-icon');
+
+    themeToggleButton.addEventListener('click', () => {
+      state.isDarkMode = !state.isDarkMode;
+      if (state.isDarkMode) {
+        document.documentElement.classList.add('dark');
+        themeToggleButton.innerHTML = `
+          <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.364l-.707-.707M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+        `;
+      } else {
+        document.documentElement.classList.remove('dark');
+        themeToggleButton.innerHTML = `
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+          </svg>
+        `;
+      }
+    });
+
+    // Render key terms glossary list
+    function renderKeyTerms() {
+      const grid = document.getElementById('key-terms-grid');
+      grid.innerHTML = '';
+      
+      const filtered = keyTerms.filter(item => 
+        item.term.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
+        item.definition.toLowerCase().includes(state.searchTerm.toLowerCase())
+      );
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-6 text-slate-500 dark:text-slate-400 text-sm font-medium">
+            No matching terms found. Try adjusting your query!
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(item => {
+        const card = document.createElement('div');
+        card.className = "p-5 rounded-xl border border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50 hover:border-emerald-300 dark:hover:border-emerald-900/80 transition-all duration-300 cursor-pointer space-y-2 group";
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <h3 class="font-bold text-slate-900 dark:text-white text-sm tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">${item.term}</h3>
+            <span class="text-xs font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">Glossary</span>
+          </div>
+          <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">${item.definition}</p>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Attach Search listener to Glossary
+    document.getElementById('terms-search').addEventListener('input', (e) => {
+      state.searchTerm = e.target.value;
+      renderKeyTerms();
+    });
+
+    // Update Mastery Progress Indicator values
+    function updateProgress() {
+      const total = techniques.length;
+      const count = state.exploredCards.size;
+      const pct = Math.round((count / total) * 100);
+      
+      const badge = document.getElementById('progress-badge');
+      const progressBar = document.getElementById('mastery-progress-bar');
+      const banner = document.getElementById('mastery-banner');
+
+      badge.innerText = `${count}/${total} Mastered`;
+      progressBar.style.width = `${pct}%`;
+
+      // Trigger completion animations
+      if (count === total) {
+        banner.classList.remove('hidden');
+        setTimeout(() => {
+          banner.classList.add('scale-100', 'opacity-100');
+          banner.classList.remove('scale-95', 'opacity-0');
+        }, 50);
+      }
+    }
+
+    // Toggle 3D Flip mechanism
+    window.flipCard = function(id) {
+      const container = document.getElementById(`card-container-${id}`);
+      const inner = document.getElementById(`card-inner-${id}`);
+      
+      inner.classList.toggle('is-flipped');
+      
+      if (inner.classList.contains('is-flipped')) {
+        state.exploredCards.add(id);
+        updateProgress();
+      }
+    };
+
+    // Render exact active example content on card backs
+    window.setCardExample = function(techId, exampleIndex, event) {
+      if (event) {
+        event.stopPropagation(); // Stop trigger flipping on back elements
+      }
+      state.activeExamples[techId] = exampleIndex;
+      renderCardBackActiveState(techId);
+    };
+
+    // Advancing sequentially with "Next Example" button click
+    window.nextCardExample = function(techId, maxCount, event) {
+      if (event) {
+        event.stopPropagation();
+      }
+      let currentIdx = state.activeExamples[techId];
+      let nextIdx = (currentIdx + 1) % maxCount;
+      state.activeExamples[techId] = nextIdx;
+      renderCardBackActiveState(techId);
+    };
+
+    // Open strategy graphic Modal
+    window.openGraphic = function(id, event) {
+      if (event) {
+        event.stopPropagation(); // Crucial: Prevents card flip action on clicking this button
+      }
+      
+      const tech = techniques.find(t => t.id === id);
+      if (!tech) return;
+
+      // Format pad numbers: 1 -> 01, 2 -> 02, etc.
+      const paddedNum = String(id).padStart(2, '0');
+      const fileName = `graphic${paddedNum}.png`;
+
+      const modal = document.getElementById('graphic-modal');
+      const modalImg = document.getElementById('modal-img');
+      const modalTitle = document.getElementById('modal-title');
+      const modalDesc = document.getElementById('modal-desc');
+      const modalExtLink = document.getElementById('modal-external-link');
+      const fallbackLink = document.getElementById('error-fallback-link');
+      const missingFileSpan = document.getElementById('missing-filename');
+      const spinner = document.getElementById('modal-spinner');
+      const errorDiv = document.getElementById('modal-error');
+
+      // State reset
+      spinner.classList.remove('opacity-0', 'hidden');
+      modalImg.classList.add('opacity-0');
+      errorDiv.classList.add('hidden');
+
+      // Populate content and values
+      modalTitle.innerText = `${tech.title} (Graphic Architecture)`;
+      modalDesc.innerText = `Visual blueprint demonstrating Technique ${id}: "${tech.title}". Serves to securely constrain inputs and eliminate generative hallucination patterns.`;
+      modalImg.src = fileName;
+      modalImg.alt = `${tech.title} Schematic Diagram`;
+      modalExtLink.href = fileName;
+      fallbackLink.href = fileName;
+      missingFileSpan.innerText = fileName;
+
+      // Toggle display with smooth CSS opacity
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.remove('opacity-0', 'pointer-events-none');
+        modal.querySelector('.relative').classList.remove('scale-95');
+        modal.querySelector('.relative').classList.add('scale-100');
+      }, 20);
+    };
+
+    // Close strategy graphic Modal
+    window.closeGraphicModal = function() {
+      const modal = document.getElementById('graphic-modal');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.querySelector('.relative').classList.add('scale-95');
+      modal.querySelector('.relative').classList.remove('scale-100');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+    };
+
+    // On Successful Graphic Image Load
+    window.handleImageLoaded = function() {
+      const spinner = document.getElementById('modal-spinner');
+      const img = document.getElementById('modal-img');
+      spinner.classList.add('opacity-0');
+      setTimeout(() => spinner.classList.add('hidden'), 300);
+      img.classList.remove('opacity-0');
+    };
+
+    // Handle Image Error Fallbacks beautifully (No broken image boxes)
+    window.handleImageError = function() {
+      const spinner = document.getElementById('modal-spinner');
+      const img = document.getElementById('modal-img');
+      const errorDiv = document.getElementById('modal-error');
+      
+      spinner.classList.add('hidden');
+      img.classList.add('opacity-0');
+      errorDiv.classList.remove('hidden');
+    };
+
+    // Render elements of card backs reactively
+    function renderCardBackActiveState(techId) {
+      const tech = techniques.find(t => t.id === techId);
+      const activeIdx = state.activeExamples[techId];
+      const activeData = tech.examples[activeIdx];
+
+      // Update example selection pills
+      const linksContainer = document.getElementById(`example-links-${techId}`);
+      linksContainer.innerHTML = '';
+      tech.examples.forEach((ex, index) => {
+        const isActive = index === activeIdx;
+        const btn = document.createElement('button');
+        btn.onclick = (e) => setCardExample(techId, index, e);
+        btn.className = `px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+          isActive 
+            ? 'bg-slate-950 text-white dark:bg-emerald-500 dark:text-slate-950 shadow-sm' 
+            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700/80'
+        }`;
+        btn.innerText = `Ex ${index + 1}`;
+        linksContainer.appendChild(btn);
+      });
+
+      // Update interactive text frame
+      const textFrame = document.getElementById(`example-text-frame-${techId}`);
+      textFrame.innerHTML = `
+        <div class="space-y-1.5 transition-all duration-300">
+          <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400 tracking-tight flex items-center justify-between">
+            <span>Scenario ${activeIdx + 1}: ${activeData.title}</span>
+            <span class="text-[10px] font-mono bg-slate-100 dark:bg-slate-950 text-slate-500 px-1.5 py-0.5 rounded">${activeIdx + 1}/${tech.examples.length}</span>
+          </p>
+          <blockquote class="text-[12px] font-medium leading-relaxed italic text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border-l-2 border-emerald-500">
+            "${activeData.scenario}"
+          </blockquote>
+        </div>
+      `;
+    }
+
+    // Render Nine Lesson Cards Grid
+    function renderTechniquesGrid() {
+      const grid = document.getElementById('techniques-grid');
+      grid.innerHTML = '';
+
+      techniques.forEach(tech => {
+        const container = document.createElement('div');
+        container.id = `card-container-${tech.id}`;
+        container.className = "card-container w-full h-[590px]"; // Perfect viewport padding container
+
+        container.innerHTML = `
+          <div id="card-inner-${tech.id}" class="card-inner">
+            
+            <!-- FRONT SIDE: Strategy Description & Icons -->
+            <div class="card-front border border-slate-200 dark:border-slate-850 bg-white dark:bg-slate-900 p-6 flex flex-col justify-between shadow-sm hover:border-emerald-300/40 dark:hover:border-emerald-900/30 transition-all duration-300">
+              <div class="space-y-5">
+                
+                <!-- Card Header Info -->
+                <div class="flex items-center justify-between">
+                  <span class="text-[11px] font-bold tracking-widest text-slate-400 uppercase font-mono">${tech.number}</span>
+                  <span class="text-[10px] bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Stability Guard</span>
+                </div>
+
+                <!-- Custom Inline SVG Icon Block -->
+                <div class="w-12 h-12 rounded-xl bg-slate-55 dark:bg-slate-950 flex items-center justify-center border border-slate-100 dark:border-slate-800">
+                  ${tech.icon}
+                </div>
+
+                <!-- Titles and Summaries -->
+                <div class="space-y-2">
+                  <h3 class="text-xl font-extrabold tracking-tight text-slate-905 dark:text-white leading-tight">
+                    ${tech.title}
+                  </h3>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
+                    ${tech.description}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Double Action Row with visual Strategy Graphic Launcher -->
+              <div class="pt-4 border-t border-slate-100 dark:border-slate-800/60 space-y-2.5">
+                <!-- NEW: View Graphic Trigger Button -->
+                <button onclick="openGraphic(${tech.id}, event)" class="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 dark:bg-emerald-950/30 dark:hover:bg-emerald-900/55 dark:text-emerald-300 text-xs font-bold border border-emerald-200/60 dark:border-emerald-900/40 hover:border-emerald-300 dark:hover:border-emerald-800 transition-all">
+                  <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                  <span>View Strategy Graphic</span>
+                </button>
+
+                <!-- Core Card Flip Button -->
+                <button onclick="flipCard(${tech.id})" class="w-full inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-slate-950 hover:bg-slate-900 text-white dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-850 dark:border-slate-700 transition-all">
+                  <span>Explore Strategy & Examples</span>
+                  <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- BACK SIDE: Proofs, Why Technique Works, and Examples Tabs -->
+            <div class="card-back border border-emerald-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 flex flex-col justify-between shadow-inner">
+              
+              <div class="space-y-4 overflow-y-auto custom-scrollbar flex-grow pr-1">
+                
+                <!-- Mini Identifier -->
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest font-mono">Interactive Proof Portal</span>
+                  <span class="text-[9px] bg-slate-100 dark:bg-slate-950 text-slate-500 dark:text-slate-400 font-semibold px-2 py-0.5 rounded-full">${tech.examples.length} Scenarios Available</span>
+                </div>
+
+                <!-- WHY IT WORKS BLOCK -->
+                <div class="space-y-1 bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-100 dark:border-slate-800/60">
+                  <h4 class="text-[11px] font-extrabold uppercase tracking-wide text-slate-450 text-slate-500">Why the technique works</h4>
+                  <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                    ${tech.whyWorks}
+                  </p>
+                </div>
+
+                <!-- INTERACTIVE TABBED EXAMPLES SECTION -->
+                <div class="space-y-3 pt-1">
+                  <h4 class="text-[11px] font-extrabold uppercase tracking-wide text-slate-400">Examples Link Buttons</h4>
+                  
+                  <!-- Link Buttons for each example -->
+                  <div id="example-links-${tech.id}" class="flex flex-wrap gap-1.5">
+                    <!-- Javascript inserts buttons dynamically -->
+                  </div>
+
+                  <!-- Dynamic Output Text Box -->
+                  <div id="example-text-frame-${tech.id}" class="min-h-[140px] flex flex-col justify-center bg-slate-50 dark:bg-slate-950 rounded-xl p-3 border border-slate-100 dark:border-slate-800/60 transition-all duration-300">
+                    <!-- Content populated by renderCardBackActiveState -->
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Action buttons for flipping and advancing sequential example -->
+              <div class="pt-4 mt-2 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between gap-3">
+                <button onclick="flipCard(${tech.id})" class="inline-flex items-center justify-center px-3.5 py-2 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" aria-label="Flip card back">
+                  <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                  </svg>
+                  <span>Flip Back</span>
+                </button>
+
+                <button onclick="nextCardExample(${tech.id}, ${tech.examples.length}, event)" class="inline-flex items-center justify-center px-4 py-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold transition-all">
+                  <span>Next Example</span>
+                  <svg class="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                  </svg>
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        `;
+        grid.appendChild(container);
+        
+        // Initiate active examples state and render details on backend load
+        renderCardBackActiveState(tech.id);
+      });
+    }
+
+    // Modal Exit with Escape Key Bindings
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeGraphicModal();
+      }
+    });
+
+    // Window mounting and lifecycle
+    window.onload = function() {
+      renderKeyTerms();
+      renderTechniquesGrid();
+      updateProgress();
+    };
+  </script>
+</body>
+</html>
